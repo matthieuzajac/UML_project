@@ -11,10 +11,9 @@ U -> UI : click "Report"
 UI -> UI : showReportDialog(contentType, contentId)
 U -> UI : selectReason(reason, details)
 
+create REP
 UI -> REP : createReport(userId, contentType, contentId, reason, details)
 activate REP
-
-create REP
 REP -> REP : validate()
 
 REP -> DB : save()
