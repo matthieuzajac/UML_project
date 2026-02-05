@@ -15,12 +15,7 @@ skinparam maxMessageSize 180
 ' ============================================
 state "Novel Lifecycle" as novel_group <<Package>> {
 
-    state Draft {
-        description : Invisible aux lecteurs
-        entry : createNovel()
-        exit : validateContent()
-    }
-
+    state Draft
     state Active {
         description : Visible dans les recherches
         entry : publishNovel()
@@ -48,7 +43,7 @@ state "Novel Lifecycle" as novel_group <<Package>> {
     }
 
     ' Main transitions
-    [*] --> Draft : createNovel()
+    [*] --> Draft
     Draft --> Active : publish()
     Active --> Hiatus : markAsHiatus()
     Hiatus --> Active : resumePublication()
@@ -75,11 +70,7 @@ state "Novel Lifecycle" as novel_group <<Package>> {
 ' ============================================
 state "Chapter Lifecycle" as chapter_group <<Package>> {
 
-    state ChapterDraft {
-        description : Brouillon non visible
-        entry : createChapter()
-    }
-
+    state ChapterDraft
     state ChapterPending {
         description : En attente validation
         entry : submitForPublish()
@@ -96,7 +87,7 @@ state "Chapter Lifecycle" as chapter_group <<Package>> {
     }
 
     ' Transitions
-    [*] --> ChapterDraft : createChapter()
+    [*] --> ChapterDraft
     ChapterDraft --> ChapterPending : submit()
     ChapterPending --> Published : approve()
     ChapterPending --> ChapterDraft : reject()
@@ -111,11 +102,7 @@ state "Chapter Lifecycle" as chapter_group <<Package>> {
 ' ============================================
 state "Review Lifecycle" as review_group <<Package>> {
 
-    state ReviewDraft {
-        description : En rédaction
-        entry : startWriting()
-    }
-
+    state ReviewDraft
     state ReviewPending {
         description : Soumise pour publication
         entry : submitReview()
@@ -137,7 +124,7 @@ state "Review Lifecycle" as review_group <<Package>> {
     }
 
     ' Transitions
-    [*] --> ReviewDraft : startWriting()
+    [*] --> ReviewDraft
     ReviewDraft --> ReviewPending : submit()
     ReviewDraft --> ReviewDeleted : cancel()
     ReviewPending --> ReviewPublished : approve()
