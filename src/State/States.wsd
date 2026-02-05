@@ -38,18 +38,29 @@ state Deleted {
   Deleted : Données archivées ou purgées
 }
 
+Draft --> Draft : updateMetadata()
 Draft --> Active : publishFirstChapter()
+Active --> Active : publishChapter()
+Active --> Active : updateMetadata()
+Hiatus --> Hiatus : updateMetadata()
+Completed --> Completed : updateMetadata()
+
 Active --> Hiatus : markAsHiatus() [si > 1 mois sans maj]
-Hiatus --> Active : publishChapter()
+Hiatus --> Active : resumePublication()
+Hiatus --> Completed : markAsCompleted()
 Active --> Completed : markAsCompleted()
 Completed --> Active : addSideStory()
 
 Active --> Shadowbanned : moderatorAction() [violation des règles]
 Hiatus --> Shadowbanned : moderatorAction() [violation des règles]
-Shadowbanned --> Active : moderatorReview() [approuvé]
+Completed --> Shadowbanned : moderatorAction() [violation des règles]
+Shadowbanned --> Active : moderatorReview() [restaure actif]
+Shadowbanned --> Hiatus : moderatorReview() [restaure hiatus]
+Shadowbanned --> Completed : moderatorReview() [restaure terminé]
 Shadowbanned --> Deleted : moderatorAction() [violation grave]
 
 Draft --> Deleted : deleteByAuthor()
+Published --> Deleted : deleteByAuthor()
 Published --> Deleted : deleteByModerator()
 Deleted --> [*]
 
