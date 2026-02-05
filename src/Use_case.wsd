@@ -1,6 +1,8 @@
 @startuml usecase
 left to right direction
 skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam shadowing false
 
 actor "Guest" as G
 actor "Authenticated User" as AU
@@ -14,46 +16,60 @@ AU <|-- R
 R <|-- A
 AU <|-- M
 
-rectangle "Webnovel System (Royal Road Clone)" {
-    
-    ' === Use Cases Communs (Guest) ===
-    (Search Novel) as UC1
-    (Read Public Chapter) as UC2
-    (Browse by Genre/Tag) as UC14
-    (Register Account) as UC15
-    
-    ' === Use Cases Authenticated User ===
-    (Login) as UC_Login
-    (Logout) as UC_Logout
-    (Manage Profile) as UC3
-    (Receive Notifications) as UC4
-    (Reset Password) as UC16
-    (Report Content) as UC13
-    
-    ' === Use Cases Reader (hérite des use cases Auth User) ===
-    ' Un Reader peut faire tout ce qu'un Auth User fait
-    ' + fonctionnalités de lecture spécifiques
-    (Post Review/Rating) as UC5
-    (Manage Library) as UC6
-    (Subscribe to Novel) as UC7
-    (Mark Review as Helpful) as UC17
-    (Track Reading Progress) as UC18
-    
-    ' === Use Cases Author (hérite de Reader) ===
-    ' Un Author peut faire tout ce qu'un Reader fait
-    ' + fonctionnalités d'écriture spécifiques
-    (Create/Edit Novel) as UC8
-    (Publish Chapter) as UC9
-    (View Analytics) as UC10
-    (Manage Novel Status) as UC19
-    (Add Tags/Genres) as UC20
-    
-    ' === Use Cases Moderator (hérite de Auth User) ===
-    (Delete Review) as UC11
-    (Ban User) as UC12
-    (Review Reports) as UC21
-    (Moderate Content) as UC22
-    (Shadowban User) as UC23
+rectangle "Webnovel System (Royal Road Clone)" as System {
+    package "Guest Access" as GuestPkg {
+        ' === Use Cases Communs (Guest) ===
+        (Search Novel) as UC1
+        (Read Public Chapter) as UC2
+        (Browse by Genre/Tag) as UC14
+        (Register Account) as UC15
+    }
+
+    package "Authenticated User" as AuthPkg {
+        ' === Use Cases Authenticated User ===
+        (Login) as UC_Login
+        (Logout) as UC_Logout
+        (Manage Profile) as UC3
+        (Receive Notifications) as UC4
+        (Reset Password) as UC16
+        (Report Content) as UC13
+    }
+
+    package "Reader Features" as ReaderPkg {
+        ' === Use Cases Reader (hérite des use cases Auth User) ===
+        ' Un Reader peut faire tout ce qu'un Auth User fait
+        ' + fonctionnalités de lecture spécifiques
+        (Post Review/Rating) as UC5
+        (Manage Library) as UC6
+        (Subscribe to Novel) as UC7
+        (Mark Review as Helpful) as UC17
+        (Track Reading Progress) as UC18
+    }
+
+    package "Author Features" as AuthorPkg {
+        ' === Use Cases Author (hérite de Reader) ===
+        ' Un Author peut faire tout ce qu'un Reader fait
+        ' + fonctionnalités d'écriture spécifiques
+        (Create/Edit Novel) as UC8
+        (Publish Chapter) as UC9
+        (View Analytics) as UC10
+        (Manage Novel Status) as UC19
+        (Add Tags/Genres) as UC20
+    }
+
+    package "Moderator Tools" as ModPkg {
+        ' === Use Cases Moderator (hérite de Auth User) ===
+        (Delete Review) as UC11
+        (Ban User) as UC12
+        (Review Reports) as UC21
+        (Moderate Content) as UC22
+        (Shadowban User) as UC23
+    }
+
+    GuestPkg -[hidden]-> AuthPkg
+    AuthPkg -[hidden]-> ReaderPkg
+    ReaderPkg -[hidden]-> AuthorPkg
+    AuthorPkg -[hidden]-> ModPkg
 
     ' Relations Inclusion/Extension
     UC3 ..> UC_Login : <<include>>
@@ -65,7 +81,7 @@ rectangle "Webnovel System (Royal Road Clone)" {
     UC13 ..> UC_Login : <<include>>
     UC17 ..> UC_Login : <<include>>
     UC18 ..> UC_Login : <<include>>
-    
+
     UC2 <.. UC13 : <<extend>>
     UC5 <.. UC13 : <<extend>>
     UC1 <.. UC14 : <<extend>>
