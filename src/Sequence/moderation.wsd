@@ -2,22 +2,68 @@
 header Diagramme de Séquence - Modération de la Plateforme
 actor Moderator as M
 participant "UI : AdminPanel" as UI
-participant "novel : Novel" as N
-participant "author : Author" as A
-participant "notif : Notification" as NS
+participant "report : Report" as REP
+participant "content : Content" as C
+participant "user : Author/Reader" as U
+participant "notif : NotificationService" as NS
+database "Database" as DB
 
-M -> UI : reportList.view(novelId)
-UI -> N : getFlags()
-N --> UI : listReports
+M -> UI : viewModerationQueue()
+UI -> DB : getReports(status=PENDING)
+activate DB
+DB --> UI : reportList
+deactivate DB
+UI --> M : showReports()
 
-M -> UI : takeAction("Shadowban")
-activate UI
-UI -> N : setStatus(SHADOWBANNED)
-N -> N : hideFromSearch()
+M -> UI : openReport(reportId)
+UI -> DB : getReportDetails(reportId)
+activate DB
+DB --> UI : reportData
+deactivate DB
+UI --> M : displayReport(reportData)
 
-UI -> NS : createNotif(authorId, "Content Violated Rules")
-NS -> A : sendEmail()
+M -> UI : takeAction(action)
+UI -> REP : resolve(reportId, action)
+activate REP
 
-UI --> M : success("Novel Moderated")
-deactivate UI
+REP -> DB : updateReportStatus(RESOLVED)
+activate DB
+DB --> REP : success
+deactivate DB
+
+alt action == "remove"
+    REP -> C : deleteContent(contentId)
+    activate C
+    C -> DB : markContentDeleted(contentId)
+    activate DB
+    DB --> C : success
+    deactivate DB
+    deactivate C
+else action == "shadowban"
+    REP -> C : setVisibility(SHADOWBANNED)
+    activate C
+    C -> DB : updateContentStatus(contentId, SHADOWBANNED)
+    activate DB
+    DB --> C : success
+    deactivate DB
+    deactivate C
+else action == "warn"
+    REP -> DB : addAccountWarning(ownerId, reason)
+    activate DB
+    DB --> REP : success
+    deactivate DB
+end
+
+REP -> NS : notifyUser(ownerId, action, reason)
+activate NS
+NS -> DB : saveNotification()
+activate DB
+DB --> NS : success
+deactivate DB
+NS -> U : deliverNotification()
+deactivate NS
+
+REP --> UI : actionCompleted()
+deactivate REP
+UI --> M : showConfirmation()
 @enduml
