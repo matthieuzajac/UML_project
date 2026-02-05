@@ -1,5 +1,5 @@
 @startuml activity diagram reading
-header Diagramme d'Activité - Parcours de Lecture
+header Diagramme d'Activité - Lecture et Interactions
 skinparam conditionStyle diamond
 
 start

@@ -1,5 +1,5 @@
 @startuml sequence diagram authentication
-header Diagramme de Séquence - Authentification Utilisateur
+header Diagramme de Séquence - Gestion de Compte et Session
 actor User as U
 participant "UI : LoginPage" as UI
 participant "auth : AuthService" as AUTH

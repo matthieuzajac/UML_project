@@ -1,5 +1,5 @@
 @startuml activity diagram search
-header Diagramme d'Activité - Recherche de Romans
+header Diagramme d'Activité - Exploration du Catalogue
 skinparam conditionStyle diamond
 
 start

@@ -1,5 +1,5 @@
 @startuml activity diagram
-header Diagramme d'Activité - Soumission de Contenu
+header Diagramme d'Activité - Publication de Chapitre
 skinparam conditionStyle diamond
 
 start

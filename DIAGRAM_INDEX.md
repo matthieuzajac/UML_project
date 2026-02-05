@@ -79,8 +79,8 @@ Quick reference guide to all diagrams in this repository.
 ### 6. Use Case Diagram
 **File**: `src/Use_case.wsd`  
 **Purpose**: All system capabilities and actor interactions  
-**Actors**: Guest (4 use cases), Authenticated_User (6 use cases), Reader (5 use cases), Author (5 use cases), Moderator (5 use cases)  
-**Total Use Cases**: 23
+**Actors**: Guest (3 primary use cases), Authenticated_User (3 primary), Reader (2 primary), Author (3 primary), Moderator (1 primary) with grouped sub-use cases  
+**Total Use Cases**: 31 (including grouped sub-cases)
 
 **View this to understand**: What users can do in the system
 
@@ -108,16 +108,16 @@ Quick reference guide to all diagrams in this repository.
 
 ## 🔄 Activity Diagrams (Workflows)
 
-### 9. Reading Workflow
+### 9. Reading & Interaction Workflow
 **File**: `src/Activity/reading.wsd`  
-**Flow**: Search → Browse → Read chapters → Progress tracking → Library/Subscribe → Review  
+**Flow**: Explore catalog → Read chapters → Progress tracking → Library/Subscribe → Reviews  
 **Actors**: Guest, Reader
 
 **View this to understand**: Reader journey from discovery to engagement
 
 ---
 
-### 10. Content Submission Workflow
+### 10. Chapter Publication Workflow
 **File**: `src/Activity/soumission.wsd`  
 **Flow**: Draft → Publish → Validation (anti-spam) → Optional moderation → Publish → Notify  
 **Actors**: Author, Moderator (optional)
@@ -126,7 +126,7 @@ Quick reference guide to all diagrams in this repository.
 
 ---
 
-### 11. Search Workflow
+### 11. Catalog Exploration Workflow
 **File**: `src/Activity/search.wsd`  
 **Flow**: Set criteria (keywords, genres, tags, filters) → Search → Sort → Browse → Select  
 **Filters**: Status, rating, genres, tags  
@@ -147,7 +147,7 @@ Quick reference guide to all diagrams in this repository.
 
 ## 📨 Sequence Diagrams (Interactions)
 
-### 13. Authentication
+### 13. Account & Session Management
 **File**: `src/Sequence/authentication.wsd`  
 **Scenarios**: Login flow, Registration flow  
 **Participants**: User, UI, AuthService, Database
@@ -165,7 +165,7 @@ Quick reference guide to all diagrams in this repository.
 
 ---
 
-### 15. Library Management
+### 15. Library & Subscriptions (Add)
 **File**: `src/Sequence/library.wsd`  
 **Flow**: Reader adds novel → Check duplicate → Get details → Save relation  
 **Participants**: Reader, UI, Library, Novel, Database
@@ -174,7 +174,7 @@ Quick reference guide to all diagrams in this repository.
 
 ---
 
-### 16. Subscription Management
+### 16. Library & Subscriptions (Subscribe)
 **File**: `src/Sequence/subscription.wsd`  
 **Scenarios**: Subscribe, Unsubscribe, New chapter notification delivery  
 **Participants**: Reader, Author, UI, Subscription, Novel, NotificationService, Database
@@ -183,7 +183,7 @@ Quick reference guide to all diagrams in this repository.
 
 ---
 
-### 17. Review Submission
+### 17. Review Interactions
 **File**: `src/Sequence/reviewing.wsd`  
 **Flow**: Submit review → Create → Save → Update novel rating  
 **Participants**: Reader, UI, Review, Novel, Database
@@ -192,7 +192,7 @@ Quick reference guide to all diagrams in this repository.
 
 ---
 
-### 18. Content Moderation
+### 18. Platform Moderation
 **File**: `src/Sequence/moderation.wsd`  
 **Flow**: View reports → Take action (shadowban) → Notify author  
 **Participants**: Moderator, UI, Novel, Author, NotificationService
@@ -201,7 +201,7 @@ Quick reference guide to all diagrams in this repository.
 
 ---
 
-### 19. Content Reporting
+### 19. Reporting & Review
 **File**: `src/Sequence/report_content.wsd`  
 **Scenarios**: Submit report, Moderator review (resolve or dismiss)  
 **Participants**: User, Moderator, UI, Report, NotificationService, Database
@@ -240,7 +240,7 @@ Quick reference guide to all diagrams in this repository.
 | Library management | Activity/reading.wsd | Sequence/library.wsd |
 | Subscriptions | Activity/reading.wsd | Sequence/subscription.wsd |
 | Search & Discovery | Activity/search.wsd | - |
-| Authentication | - | Sequence/authentication.wsd |
+| Account & session | - | Sequence/authentication.wsd |
 | Moderation | - | Sequence/moderation.wsd, Sequence/report_content.wsd |
 
 ### I want to understand state changes
@@ -252,21 +252,21 @@ Quick reference guide to all diagrams in this repository.
 ## 🔍 Quick Reference by Actor
 
 ### Guest
-- **Use Cases**: UC1, UC2, UC14, UC15 (Use_case.wsd)
+- **Use Cases**: UC_Explore, UC2, UC15 (Use_case.wsd)
 - **Workflows**: Activity/reading.wsd, Activity/search.wsd
 
 ### Reader
-- **Use Cases**: UC5, UC6, UC7, UC17, UC18 (Use_case.wsd)
+- **Use Cases**: UC_Library, UC_Reviews (Use_case.wsd)
 - **Workflows**: Activity/reading.wsd, Activity/search.wsd
 - **Interactions**: Sequence/library.wsd, Sequence/reviewing.wsd, Sequence/subscription.wsd, Sequence/report_content.wsd
 
 ### Author
-- **Use Cases**: UC8, UC9, UC10, UC19, UC20 (Use_case.wsd)
+- **Use Cases**: UC_ManageNovel, UC9, UC10 (Use_case.wsd)
 - **Workflows**: Activity/author_workflow.wsd, Activity/soumission.wsd
 - **Interactions**: Sequence/chapter_publish.wsd, Sequence/subscription.wsd
 
 ### Moderator
-- **Use Cases**: UC11, UC12, UC21, UC22, UC23 (Use_case.wsd)
+- **Use Cases**: UC_Moderate (Use_case.wsd)
 - **Workflows**: None (moderation is reactive)
 - **Interactions**: Sequence/moderation.wsd, Sequence/report_content.wsd
 

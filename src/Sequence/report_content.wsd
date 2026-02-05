@@ -1,5 +1,5 @@
 @startuml sequence diagram report content
-header Diagramme de Séquence - Signalement de Contenu
+header Diagramme de Séquence - Signalement et Revue de Rapports
 actor "User" as U
 participant "UI : Interface" as UI
 participant "report : Report" as REP

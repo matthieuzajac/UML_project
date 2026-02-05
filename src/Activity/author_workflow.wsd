@@ -1,5 +1,5 @@
 @startuml activity diagram author workflow
-header Diagramme d'Activité - Flux de Travail Auteur
+header Diagramme d'Activité - Gestion du Roman et Publication
 skinparam conditionStyle diamond
 
 start
