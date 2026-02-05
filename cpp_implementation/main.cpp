@@ -88,18 +88,5 @@ int main() {
     Report report3(5003, 1, "Chapter", 1002, "Spam content", ReportStatus::RESOLVED, "2024-05-10");
 
     std::cout << "All objects instantiated successfully!" << std::endl;
-    std::cout << "Number of Readers: 2" << std::endl;
-    std::cout << "Number of Authors: 2" << std::endl;
-    std::cout << "Number of Moderators: 2" << std::endl;
-    std::cout << "Number of Novels: 3" << std::endl;
-    std::cout << "Number of Chapters: 3" << std::endl;
-    std::cout << "Number of Reviews: 3" << std::endl;
-    std::cout << "Number of Notifications: 3" << std::endl;
-    std::cout << "Number of Library entries: 3" << std::endl;
-    std::cout << "Number of Subscriptions: 3" << std::endl;
-    std::cout << "Number of Genres: 3" << std::endl;
-    std::cout << "Number of Tags: 5" << std::endl;
-    std::cout << "Number of Reports: 3" << std::endl;
-
     return 0;
 }
