@@ -77,10 +77,10 @@ pdflatex rapport_uml.tex  # 2ème passe pour table des matières
    - 3 bases de données
 
 6. **Deployment.wsd** - Diagramme de déploiement
-   - CDN, Load Balancer, Clusters
-   - Master-Slave DB replication
+   - Architecture logique de déploiement
+   - Distribution des services métier
+   - Couches de stockage (DB, Cache, Search)
    - Workers asynchrones
-   - Services externes
 
 ### Vue Dynamique (8 diagrammes)
 

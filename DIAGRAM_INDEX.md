@@ -48,20 +48,17 @@ Quick reference guide to all diagrams in this repository.
 
 ### 4. Deployment Diagram
 **File**: `src/Deployment.wsd`  
-**Purpose**: Physical infrastructure and deployment topology  
+**Purpose**: Logical deployment architecture showing component distribution  
 **Key Nodes**:
-- Client Devices (Browsers, Mobile)
-- CDN (Static assets, Images)
-- Load Balancer (Nginx)
-- Web/App Server Clusters
-- Database Cluster (Master-Slave)
-- Cache Layer (Redis)
-- Search Infrastructure (Elasticsearch)
-- Object Storage (S3/MinIO)
-- Background Workers
-- External Services (Email, Monitoring, Logging)
+- Client Layer (Web browsers, Mobile apps)
+- Web Server (Frontend application)
+- Application Server (API Gateway, REST API, WebSocket server)
+- Business Logic Server (User, Content, Review, Notification, Moderation, Search services)
+- Data Storage (Primary database, Cache, Search index)
+- File Storage (Object storage for images and avatars)
+- Background Workers (Notification, Email, Analytics workers)
 
-**View this to understand**: How the system is deployed in production
+**View this to understand**: How the system components are distributed across nodes
 
 ---
 
@@ -293,7 +290,7 @@ Quick reference guide to all diagrams in this repository.
 2. **Component.wsd** - See the architecture
 3. **Package.wsd** - Understand code organization
 4. **Sequence/** - Study specific feature implementations
-5. **Deployment.wsd** - Learn the infrastructure
+5. **Deployment.wsd** - Learn the deployment architecture
 
 ### For Product Managers
 1. **Use_case.wsd** - All system capabilities
@@ -308,14 +305,14 @@ Quick reference guide to all diagrams in this repository.
 4. **States.wsd** - State transition testing
 
 ### For DevOps/SRE
-1. **Deployment.wsd** - Infrastructure setup
+1. **Deployment.wsd** - Deployment topology
 2. **Component.wsd** - Service dependencies
 3. **Timing.wsd** - Performance expectations
 
 ### For System Architects
 1. **Component.wsd** - Service architecture
 2. **Package.wsd** - Logical organization
-3. **Deployment.wsd** - Physical architecture
+3. **Deployment.wsd** - Deployment architecture
 4. **Class.wsd** - Data model
 5. **Sequence/** - Integration patterns
 

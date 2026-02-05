@@ -115,18 +115,15 @@ This task involved reviewing, enhancing, and ensuring complete coherence across 
 ---
 
 ##### 2. `src/Deployment.wsd` - Deployment Diagram
-**Purpose**: Infrastructure and deployment topology
+**Purpose**: Logical deployment architecture showing component distribution
 **Contains**:
-- CDN for static assets
-- Load balancer (Nginx)
-- Web server cluster
-- App server cluster
-- Database cluster (Master + 2 Replicas)
-- Redis cache cluster
-- Elasticsearch search infrastructure
-- Object storage (S3/MinIO)
-- Background job workers
-- External services (Email, Monitoring, Logging)
+- Client Layer (Web browsers, Mobile apps)
+- Web Server (Frontend application)
+- Application Server (API Gateway, REST API, WebSocket server)
+- Business Logic Server (User, Content, Review, Notification, Moderation, Search services)
+- Data Storage (Primary database, Cache layer, Search index)
+- File Storage (Object storage for images and avatars)
+- Background Workers (Notification, Email, Analytics workers)
 
 ---
 

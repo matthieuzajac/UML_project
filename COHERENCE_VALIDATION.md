@@ -172,16 +172,19 @@ All diagrams have been reviewed and updated to ensure complete coherence across 
 
 | Component Service | Deployment Node |
 |------------------|-----------------|
-| Authentication Service | ✅ Application Servers → API Service |
-| Novel Service | ✅ Application Servers → API Service |
-| Notification Service | ✅ Application Servers → WebSocket Server |
-| Search Service | ✅ Application Servers → API Service (queries ES cluster) |
-| File Storage | ✅ Storage Services → Object Storage |
-| Email Service | ✅ External Services → Email Provider |
-| Cache Service | ✅ Cache Layer → Redis Cluster |
-| Search Engine | ✅ Search Infrastructure → Elasticsearch |
+| Authentication Service | ✅ Application Server → REST API |
+| User Service | ✅ Business Logic Server → User Service |
+| Novel Service | ✅ Business Logic Server → Content Service |
+| Chapter Service | ✅ Business Logic Server → Content Service |
+| Review Service | ✅ Business Logic Server → Review Service |
+| Notification Service | ✅ Business Logic Server → Notification Service + Background Workers |
+| Search Service | ✅ Business Logic Server → Search Service |
+| Moderation Service | ✅ Business Logic Server → Moderation Service |
+| File Storage | ✅ File Storage → Object Storage |
+| Cache Service | ✅ Data Storage → Cache Layer |
+| Search Engine | ✅ Data Storage → Search Index |
 
-**Status**: ✅ **COHERENT** - All services are properly deployed.
+**Status**: ✅ **COHERENT** - All services are properly mapped to deployment nodes.
 
 ---
 
@@ -255,7 +258,7 @@ All sequence diagrams now include the `database "Database" as DB` participant wh
 
 ### 6. New Structural Diagrams
 - ✅ Created `Component.wsd`: Complete system architecture
-- ✅ Created `Deployment.wsd`: Infrastructure and deployment topology
+- ✅ Created `Deployment.wsd`: Logical deployment architecture
 - ✅ Created `Package.wsd`: Logical organization with layered architecture
 - ✅ Created `Object.wsd`: Concrete runtime example with real data
 - ✅ Created `Timing.wsd`: Real-time notification delivery timeline

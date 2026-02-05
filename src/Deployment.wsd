@@ -1,215 +1,143 @@
-' NOTE: Ce diagramme de déploiement est présent mais selon les directives UML,
-' ce type de diagramme est recommandé uniquement s'il y a des entités matérielles à décrire.
-' Si aucune infrastructure physique n'est modélisée, ce diagramme pourrait ne pas être nécessaire.
-
 @startuml deployment diagram
-header Diagramme de Déploiement - Infrastructure Système
+header Diagramme de Déploiement - Architecture Système
 
 skinparam componentStyle rectangle
 
-node "Client Devices" {
-    artifact "Web Browser" as Browser
-    artifact "Mobile App (iOS/Android)" as Mobile
+node "Client Layer" as ClientNode {
+    artifact "Web Browser" as WebClient
+    artifact "Mobile Application" as MobileClient
 }
 
-node "CDN (Content Delivery Network)" {
-    artifact "Static Assets" as CDN
-    artifact "Image Cache" as ImgCache
+node "Web Server" as WebServer {
+    component "Frontend Application" as Frontend
+    note right of Frontend
+        Interface utilisateur
+        Pages web et assets
+    end note
 }
 
-node "Load Balancer" {
-    component "Nginx" as LB
+node "Application Server" as AppServer {
+    component "API Gateway" as APIGateway
+    component "REST API" as RestAPI
+    component "WebSocket Server" as WSServer
+    
+    note right of APIGateway
+        Point d'entrée unique
+        Authentification
+        Rate limiting
+    end note
 }
 
-node "Web Servers Cluster" {
-    node "Web Server 1" {
-        component "Frontend App" as Frontend1
-    }
-    node "Web Server 2" {
-        component "Frontend App" as Frontend2
-    }
-    node "Web Server N" {
-        component "Frontend App" as FrontendN
-    }
+node "Business Logic Server" as BusinessServer {
+    component "User Service" as UserSvc
+    component "Content Service" as ContentSvc
+    component "Review Service" as ReviewSvc
+    component "Notification Service" as NotifSvc
+    component "Moderation Service" as ModSvc
+    component "Search Service" as SearchSvc
+    
+    note right of BusinessServer
+        Services métier
+        Logique applicative
+    end note
 }
 
-node "Application Servers Cluster" {
-    node "App Server 1" {
-        component "API Service" as API1
-        component "WebSocket Server" as WS1
-    }
-    node "App Server 2" {
-        component "API Service" as API2
-        component "WebSocket Server" as WS2
-    }
-    node "App Server N" {
-        component "API Service" as APIN
-        component "WebSocket Server" as WSN
-    }
-}
-
-node "Database Cluster" {
-    database "Primary DB\n(Master)" as DBMaster {
+node "Data Storage" as StorageNode {
+    database "Primary Database" as PrimaryDB {
         [Users]
         [Novels]
         [Chapters]
         [Reviews]
+        [Notifications]
+        [Reports]
     }
     
-    database "Read Replica 1\n(Slave)" as DBSlave1 {
-        [Replicated Data]
-    }
-    
-    database "Read Replica 2\n(Slave)" as DBSlave2 {
-        [Replicated Data]
-    }
-}
-
-node "Cache Layer" {
-    database "Redis Cluster" as Redis {
-        [Session Store]
+    database "Cache Layer" as Cache {
+        [Session Data]
         [Query Cache]
-        [Rate Limiting]
+        [Popular Content]
     }
-}
-
-node "Search Infrastructure" {
-    database "Elasticsearch\nCluster" as ES {
+    
+    database "Search Index" as SearchDB {
         [Novel Index]
         [Full-Text Search]
     }
+    
+    note bottom of PrimaryDB
+        Base de données relationnelle
+        Stockage principal des données
+    end note
 }
 
-node "Storage Services" {
-    cloud "Object Storage\n(S3/MinIO)" as ObjectStorage {
+node "File Storage" as FileNode {
+    cloud "Object Storage" as ObjectStorage {
         artifact "Cover Images" as Covers
         artifact "User Avatars" as Avatars
-        artifact "Backups" as Backups
     }
+    
+    note right of ObjectStorage
+        Stockage de fichiers
+        Images et assets
+    end note
 }
 
-node "Background Services" {
-    component "Job Queue\n(RabbitMQ/Redis)" as Queue
-    component "Worker 1\n(Notifications)" as Worker1
-    component "Worker 2\n(Email)" as Worker2
-    component "Worker 3\n(Analytics)" as Worker3
-}
-
-node "External Services" {
-    cloud "Email Service\n(SendGrid/AWS SES)" as EmailProvider
-    cloud "Monitoring\n(Prometheus/Grafana)" as Monitoring
-    cloud "Logging\n(ELK Stack)" as Logging
+node "Background Workers" as WorkerNode {
+    component "Notification Worker" as NotifWorker
+    component "Email Worker" as EmailWorker
+    component "Analytics Worker" as AnalyticsWorker
+    
+    note right of WorkerNode
+        Traitement asynchrone
+        Jobs en arrière-plan
+    end note
 }
 
 ' Client connections
-Browser --> CDN : HTTPS
-Mobile --> CDN : HTTPS
-Browser --> LB : HTTPS
-Mobile --> LB : HTTPS
-
-CDN --> ObjectStorage : Fetch images
-
-' Load balancer to web servers
-LB --> Frontend1 : HTTP
-LB --> Frontend2 : HTTP
-LB --> FrontendN : HTTP
+WebClient --> Frontend : HTTPS
+MobileClient --> APIGateway : HTTPS/WSS
 
 ' Frontend to API
-Frontend1 --> API1 : HTTP/WebSocket
-Frontend2 --> API2 : HTTP/WebSocket
-FrontendN --> APIN : HTTP/WebSocket
+Frontend --> APIGateway : HTTPS
 
-' API to databases
-API1 --> DBMaster : Write operations
-API1 --> DBSlave1 : Read operations
-API2 --> DBMaster : Write operations
-API2 --> DBSlave2 : Read operations
-APIN --> DBMaster : Write operations
-APIN --> DBSlave1 : Read operations
+' API Gateway routing
+APIGateway --> RestAPI : HTTP
+APIGateway --> WSServer : WebSocket
 
-' Database replication
-DBMaster --> DBSlave1 : Replication
-DBMaster --> DBSlave2 : Replication
+' API to Services
+RestAPI --> UserSvc
+RestAPI --> ContentSvc
+RestAPI --> ReviewSvc
+RestAPI --> SearchSvc
+RestAPI --> ModSvc
 
-' API to cache and search
-API1 --> Redis : Cache operations
-API2 --> Redis : Cache operations
-APIN --> Redis : Cache operations
+WSServer --> NotifSvc : Push notifications
 
-API1 --> ES : Search queries
-API2 --> ES : Search queries
-APIN --> ES : Search queries
+' Services to Database
+UserSvc --> PrimaryDB : CRUD operations
+ContentSvc --> PrimaryDB : CRUD operations
+ReviewSvc --> PrimaryDB : CRUD operations
+ModSvc --> PrimaryDB : CRUD operations
 
-' API to storage
-API1 --> ObjectStorage : Upload/Download
-API2 --> ObjectStorage : Upload/Download
-APIN --> ObjectStorage : Upload/Download
+' Services to Cache
+UserSvc --> Cache : Session management
+ContentSvc --> Cache : Content caching
+SearchSvc --> Cache : Query caching
 
-' API to job queue
-API1 --> Queue : Enqueue jobs
-API2 --> Queue : Enqueue jobs
-APIN --> Queue : Enqueue jobs
+' Services to Search
+SearchSvc --> SearchDB : Search queries
+ContentSvc --> SearchDB : Index updates
 
-' Workers
-Queue --> Worker1 : Dequeue jobs
-Queue --> Worker2 : Dequeue jobs
-Queue --> Worker3 : Dequeue jobs
+' Services to Storage
+UserSvc --> ObjectStorage : Avatar upload
+ContentSvc --> ObjectStorage : Cover images
 
-Worker1 --> DBMaster : Update notifications
-Worker1 --> WS1 : Push notifications
-Worker1 --> WS2 : Push notifications
+' Background Workers
+NotifSvc --> NotifWorker : Queue jobs
+NotifWorker --> PrimaryDB : Update notifications
+NotifWorker --> WSServer : Real-time push
 
-Worker2 --> EmailProvider : Send emails
+EmailWorker --> PrimaryDB : Fetch user data
 
-Worker3 --> DBMaster : Update analytics
-
-' Monitoring and logging
-API1 --> Monitoring : Metrics
-API2 --> Monitoring : Metrics
-APIN --> Monitoring : Metrics
-
-API1 --> Logging : Logs
-API2 --> Logging : Logs
-APIN --> Logging : Logs
-
-note right of CDN
-    Distribue les assets statiques
-    Images de couverture
-    CSS, JS, fonts
-end note
-
-note right of LB
-    Distribution de charge
-    Health checks
-    SSL termination
-end note
-
-note bottom of DBMaster
-    PostgreSQL Master
-    Écritures uniquement
-end note
-
-note bottom of DBSlave1
-    PostgreSQL Replicas
-    Lectures uniquement
-end note
-
-note right of Redis
-    Cache en mémoire
-    Sessions utilisateur
-    Rate limiting
-end note
-
-note right of ES
-    Recherche full-text
-    Indexation des romans
-end note
-
-note right of Queue
-    Traitement asynchrone
-    Notifications
-    Emails
-    Analytics
-end note
+AnalyticsWorker --> PrimaryDB : Update statistics
 
 @enduml

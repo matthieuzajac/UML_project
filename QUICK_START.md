@@ -162,7 +162,7 @@ find src -name "*.wsd" -exec plantuml -tpdf -o ../../exports/pdf {} \;
 ### Want to Understand Architecture?
 1. **src/Component.wsd** - Service architecture
 2. **src/Package.wsd** - Code organization
-3. **src/Deployment.wsd** - Infrastructure
+3. **src/Deployment.wsd** - Deployment architecture
 
 ### Want to Understand User Flows?
 1. **src/Activity/reading.wsd** - Reader journey
