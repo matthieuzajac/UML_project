@@ -1,0 +1,103 @@
+@startuml activity diagram author workflow
+header Diagramme d'Activité - Flux de Travail Auteur
+skinparam conditionStyle diamond
+
+start
+
+:Connexion en tant qu'Auteur;
+
+partition "Gestion du Roman" {
+    if (Roman existant ?) then (non)
+        :Créer un nouveau roman;
+        :Saisir titre, synopsis;
+        :Ajouter image de couverture;
+        :Sélectionner genres (1 à 3);
+        :Ajouter tags;
+        :Statut = DRAFT;
+    else (oui)
+        :Sélectionner un roman existant;
+    endif
+}
+
+partition "Rédaction de Chapitre" {
+    :Créer un nouveau chapitre;
+    :Rédiger le contenu;
+    
+    fork
+        :Ajouter titre du chapitre;
+    fork again
+        :Vérifier le nombre de mots;
+    fork again
+        :Prévisualiser le rendu;
+    end fork
+    
+    if (Contenu satisfaisant ?) then (non)
+        :Sauvegarder en brouillon;
+        detach
+    else (oui)
+        :Finaliser le chapitre;
+    endif
+}
+
+partition "Publication" {
+    if (Premier chapitre du roman ?) then (oui)
+        :Passer le roman en statut ACTIVE;
+        :Le roman devient visible dans les recherches;
+    endif
+    
+    :Cliquer sur "Publier";
+    
+    :Vérification anti-spam;
+    
+    if (Spam détecté ?) then (oui)
+        :Bloquer la publication;
+        :Notifier l'auteur;
+        stop
+    else (non)
+        :Publier le chapitre;
+        :Incrémenter le compteur de chapitres;
+        :Mettre à jour la date de dernière publication;
+    endif
+    
+    fork
+        :Envoyer notifications aux abonnés;
+    fork again
+        :Mettre à jour les statistiques du roman;
+    end fork
+}
+
+partition "Suivi et Analytics" {
+    :Consulter les statistiques;
+    
+    note right
+        Métriques disponibles :
+        - Vues totales
+        - Vues par chapitre
+        - Note moyenne
+        - Nombre d'abonnés
+        - Nombre de reviews
+        - Progression dans le temps
+    end note
+    
+    if (Analyser les retours ?) then (oui)
+        :Lire les reviews;
+        :Consulter les commentaires;
+    endif
+}
+
+partition "Gestion du Statut" {
+    if (Modifier le statut ?) then (oui)
+        if (Pause temporaire ?) then (oui)
+            :Passer en HIATUS;
+            :Informer les lecteurs;
+        else if (Roman terminé ?) then (oui)
+            :Passer en COMPLETED;
+            :Marquer comme finalisé;
+        else (continuer)
+            :Maintenir en ACTIVE;
+        endif
+    endif
+}
+
+stop
+@enduml

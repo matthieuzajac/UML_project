@@ -1,0 +1,68 @@
+@startuml sequence diagram authentication
+header Diagramme de Séquence - Authentification Utilisateur
+actor User as U
+participant "UI : LoginPage" as UI
+participant "auth : AuthService" as AUTH
+participant "user : Authenticated_user" as USER
+database "Database" as DB
+
+== Login Flow ==
+U -> UI : enterCredentials(email, password)
+UI -> AUTH : authenticate(email, password)
+activate AUTH
+
+AUTH -> DB : findUserByEmail(email)
+activate DB
+DB --> AUTH : userData
+deactivate DB
+
+AUTH -> AUTH : verifyPasswordHash(password, userData.password_hash)
+
+alt Authentication Success
+    AUTH -> DB : createSession(userId)
+    activate DB
+    DB --> AUTH : sessionToken
+    deactivate DB
+    
+    create USER
+    AUTH -> USER : loadUserData(userId)
+    
+    AUTH --> UI : success(sessionToken, user)
+    deactivate AUTH
+    UI --> U : redirectToDashboard()
+    
+else Authentication Failure
+    AUTH --> UI : error("Invalid credentials")
+    deactivate AUTH
+    UI --> U : displayError()
+end
+
+== Registration Flow ==
+U -> UI : fillRegistrationForm(username, email, password)
+UI -> AUTH : register(username, email, password)
+activate AUTH
+
+AUTH -> DB : checkEmailExists(email)
+activate DB
+DB --> AUTH : exists
+deactivate DB
+
+alt Email Available
+    AUTH -> AUTH : hashPassword(password)
+    AUTH -> DB : createUser(username, email, hash)
+    activate DB
+    DB --> AUTH : newUserId
+    deactivate DB
+    
+    AUTH -> AUTH : sendVerificationEmail(email)
+    AUTH --> UI : success("Account created")
+    deactivate AUTH
+    UI --> U : showVerificationMessage()
+    
+else Email Already Exists
+    AUTH --> UI : error("Email already registered")
+    deactivate AUTH
+    UI --> U : displayError()
+end
+
+@enduml

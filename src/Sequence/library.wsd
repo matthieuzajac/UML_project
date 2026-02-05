@@ -4,14 +4,20 @@ actor Reader as R
 participant "UI : Interface" as UI
 participant "lib : Library" as L
 participant "novel : Novel" as N
+database "Database" as DB
 
 R -> UI : click "Add to Library"
 UI -> L : addNovel(novelId)
 activate L
 L -> N : getDetails()
-N --> L : title, author
+activate N
+N --> L : title, author, status
+deactivate N
 L -> L : checkDuplicate()
 L -> DB : saveRelation(readerId, novelId)
+activate DB
+DB --> L : success
+deactivate DB
 L --> UI : confirmation
 deactivate L
 UI --> R : show "Added to Library"

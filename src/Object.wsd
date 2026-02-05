@@ -1,0 +1,201 @@
+@startuml object diagram
+header Diagramme d'Objets - Exemple Concret du Système
+skinparam objectAttributeIconSize 0
+
+object ":Reader" as reader1 {
+    id = 42
+    username = "john_reader"
+    email = "john@email.com"
+    reading_points = 1250
+    is_banned = false
+    is_shadowbanned = false
+    created_at = "2024-01-15"
+}
+
+object ":Author" as author1 {
+    id = 17
+    username = "jane_writer"
+    email = "jane@email.com"
+    total_views = 125000
+    bio = "Fantasy author, writing since 2020"
+    is_banned = false
+    is_shadowbanned = false
+    created_at = "2023-06-10"
+}
+
+object ":Novel" as novel1 {
+    id = 305
+    title = "Chronicles of the Azure Realm"
+    synopsis = "A young mage discovers..."
+    cover_image_url = "/images/covers/305.jpg"
+    average_rating = 4.7
+    total_views = 125000
+    total_chapters = 87
+    status = ACTIVE
+    created_at = "2023-07-01"
+    updated_at = "2024-02-04"
+}
+
+object ":Chapter" as chapter1 {
+    id = 2654
+    chapter_number = 1
+    title = "The Awakening"
+    content = "In the beginning..."
+    word_count = 2450
+    view_count = 15200
+    published_at = "2023-07-01"
+    is_premium = false
+}
+
+object ":Chapter" as chapter87 {
+    id = 2740
+    chapter_number = 87
+    title = "The Final Battle - Part 1"
+    content = "The armies gathered..."
+    word_count = 3200
+    view_count = 8900
+    published_at = "2024-02-04"
+    is_premium = false
+}
+
+object ":Review" as review1 {
+    id = 1523
+    novel_id = 305
+    reader_id = 42
+    content = "Amazing story! Can't wait for more!"
+    rating = 5
+    date_posted = "2024-01-20"
+    helpful_count = 23
+}
+
+object ":Review" as review2 {
+    id = 1847
+    novel_id = 305
+    reader_id = 89
+    content = "Great character development"
+    rating = 4
+    date_posted = "2024-01-28"
+    helpful_count = 15
+}
+
+object ":Library" as library1 {
+    reader_id = 42
+    novel_id = 305
+    last_read_chapter = 85
+    added_at = "2024-01-15"
+    reading_status = READING
+}
+
+object ":Subscription" as sub1 {
+    reader_id = 42
+    novel_id = 305
+    subscribed_at = "2024-01-15"
+    notify_on_update = true
+}
+
+object ":Notification" as notif1 {
+    id = 8745
+    user_id = 42
+    message = "New chapter 87 published for Chronicles of the Azure Realm"
+    type = NEW_CHAPTER
+    is_read = false
+    created_at = "2024-02-04T14:30:00"
+}
+
+object ":Genre" as genre1 {
+    id = 3
+    name = "Fantasy"
+    description = "Magical worlds and adventures"
+}
+
+object ":Genre" as genre2 {
+    id = 7
+    name = "Action"
+    description = "Fast-paced combat and adventure"
+}
+
+object ":Tag" as tag1 {
+    id = 15
+    name = "Magic System"
+}
+
+object ":Tag" as tag2 {
+    id = 42
+    name = "Epic Fantasy"
+}
+
+object ":Tag" as tag3 {
+    id = 88
+    name = "Multiple POV"
+}
+
+object ":Moderator" as mod1 {
+    id = 5
+    username = "mod_alice"
+    email = "alice@royalroad.com"
+    mod_level = 2
+    is_banned = false
+    is_shadowbanned = false
+    created_at = "2023-01-01"
+}
+
+object ":Report" as report1 {
+    id = 234
+    reporter_id = 127
+    content_type = "review"
+    content_id = 1699
+    reason = "Spam content"
+    status = PENDING
+    created_at = "2024-02-03"
+}
+
+' Relationships
+author1 -- novel1 : creates
+novel1 *-- chapter1 : contains
+novel1 *-- chapter87 : contains
+
+reader1 -- review1 : writes
+novel1 -- review1 : receives
+novel1 -- review2 : receives
+
+reader1 -- library1 : manages
+novel1 -- library1 : appears_in
+
+reader1 -- sub1 : has
+novel1 -- sub1 : has_subscribers
+
+reader1 -- notif1 : receives
+
+novel1 -- genre1 : belongs_to
+novel1 -- genre2 : belongs_to
+novel1 -- tag1 : tagged_with
+novel1 -- tag2 : tagged_with
+novel1 -- tag3 : tagged_with
+
+mod1 -- report1 : handles
+
+note top of novel1
+    Roman actif avec 87 chapitres
+    Note moyenne: 4.7/5
+    125k vues totales
+end note
+
+note right of reader1
+    Lecteur actif avec 1250 points
+    Lit actuellement le chapitre 85
+    Abonné aux notifications
+end note
+
+note right of author1
+    Auteure prolifique
+    87 chapitres publiés
+    Mise à jour récente: 04/02/2024
+end note
+
+note bottom of sub1
+    Abonnement actif avec notifications
+    Le lecteur reçoit un email pour
+    chaque nouveau chapitre
+end note
+
+@enduml

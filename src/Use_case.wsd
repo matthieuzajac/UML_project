@@ -18,51 +18,83 @@ rectangle "Webnovel System (Royal Road Clone)" {
     ' Cas d'utilisation pour les invités
     (Search Novel) as UC1
     (Read Public Chapter) as UC2
+    (Browse by Genre/Tag) as UC14
+    (Register Account) as UC15
     
     ' Cas d'utilisation pour les utilisateurs connectés
+    (Login) as UC_Login
+    (Logout) as UC_Logout
     (Manage Profile) as UC3
     (Receive Notifications) as UC4
+    (Reset Password) as UC16
+    (Report Content) as UC13
     
     ' Cas d'utilisation spécifiques au Lecteur
     (Post Review/Rating) as UC5
     (Manage Library) as UC6
     (Subscribe to Novel) as UC7
+    (Mark Review as Helpful) as UC17
+    (Track Reading Progress) as UC18
     
     ' Cas d'utilisation spécifiques à l'Auteur
     (Create/Edit Novel) as UC8
     (Publish Chapter) as UC9
     (View Analytics) as UC10
+    (Manage Novel Status) as UC19
+    (Add Tags/Genres) as UC20
     
     ' Cas d'utilisation spécifiques au Modérateur
     (Delete Review) as UC11
     (Ban User) as UC12
+    (Review Reports) as UC21
+    (Moderate Content) as UC22
+    (Shadowban User) as UC23
 
     ' Relations Inclusion/Extension
-    (Login) as UC_Login
     UC3 ..> UC_Login : <<include>>
     UC5 ..> UC_Login : <<include>>
+    UC6 ..> UC_Login : <<include>>
+    UC7 ..> UC_Login : <<include>>
     UC8 ..> UC_Login : <<include>>
+    UC9 ..> UC_Login : <<include>>
+    UC13 ..> UC_Login : <<include>>
+    UC17 ..> UC_Login : <<include>>
+    UC18 ..> UC_Login : <<include>>
     
-    (Report Content) as UC13
     UC2 <.. UC13 : <<extend>>
+    UC5 <.. UC13 : <<extend>>
+    UC1 <.. UC14 : <<extend>>
 }
 
 ' Liaisons Acteurs -> Cas d'utilisation
 G --> UC1
 G --> UC2
+G --> UC14
+G --> UC15
 
+AU --> UC_Login
+AU --> UC_Logout
 AU --> UC3
 AU --> UC4
+AU --> UC13
+AU --> UC16
 
 R --> UC5
 R --> UC6
 R --> UC7
+R --> UC17
+R --> UC18
 
 A --> UC8
 A --> UC9
 A --> UC10
+A --> UC19
+A --> UC20
 
 M --> UC11
 M --> UC12
+M --> UC21
+M --> UC22
+M --> UC23
 
 @enduml
