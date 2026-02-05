@@ -18,7 +18,7 @@
 \title{\textbf{Rapport de Conception UML}\\
 \large Système de Publication de Webnovels\\
 (Clone de Royal Road)}
-\author{}
+\author{Prénom NOM \quad -- \quad Prénom NOM \quad -- \quad Prénom NOM}
 \date{\today}
 
 \begin{document}
@@ -185,6 +185,10 @@ Le projet fournit une modélisation complète selon la norme UML 2.5 :
 \textbf{Multiplicités explicites :} toutes les associations spécifient les cardinalités (0..1, 1, 0..*, 1..*).
 
 \textbf{Visibilité cohérente :} attributs protégés (\#) pour les classes parentes, privés (-) pour les classes concrètes, publics (+) pour les méthodes.
+
+\subsection{Correspondance UML -- C++}
+
+L'implémentation C++ est fournie dans le dossier \texttt{cpp\_implementation} avec les fichiers d'en-tête pour chaque classe du diagramme et des fichiers \texttt{.cpp} contenant les signatures de méthodes. Un \texttt{main.cpp} instancie l'ensemble des objets modélisés afin de valider la cohérence UML--C++ et garantir une base compilable conforme aux consignes.
 
 \subsection{Cohérence inter-diagrammes}
 
