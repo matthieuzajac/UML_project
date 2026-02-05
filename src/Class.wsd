@@ -1,0 +1,82 @@
+@startuml class diagram
+skinparam classAttributeIconSize 0
+
+abstract class Authenticated_user {
+    # id : int
+    # username : std::string
+    # email : std::string
+    # password_hash : std::string
+    + login() : bool
+    + logout() : void
+    + updateProfile() : void
+}
+
+class Reader {
+    - reading_points : int
+    + addBookmark(novelId : int) : void
+    + postReview(content : std::string, stars : int) : void
+}
+
+class Author {
+    - total_views : long
+    - bio : std::string
+    + createNovel(title : std::string) : void
+    + publishChapter(novelId : int, content : std::string) : void
+}
+
+class Moderator {
+    - mod_level : int
+    + deleteReview(reviewId : int) : void
+    + shadowBanUser(userId : int) : void
+}
+
+class Novel {
+    - id : int
+    - title : std::string
+    - synopsis : std::string
+    - average_rating : float
+    - status : NovelStatus
+    + updateRating() : void
+    + getChapters() : std::vector<Chapter*>
+}
+
+class Chapter {
+    - chapter_number : int
+    - title : std::string
+    - content : std::string
+    - word_count : int
+    + displayContent() : std::string
+}
+
+class Review {
+    - id : int
+    - content : std::string
+    - rating : int
+    - date_posted : std::string
+    + editContent(newContent : std::string) : void
+}
+
+class Notification {
+    - message : std::string
+    - is_read : bool
+    + send() : void
+}
+
+' Héritage
+Authenticated_user <|-- Reader
+Authenticated_user <|-- Author
+Authenticated_user <|-- Moderator
+
+' Composition (Le diamant noir : si le Novel est supprimé, les chapitres le sont aussi)
+Novel "1" *-- "1..*" Chapter : contains >
+
+' Agrégation (Le diamant blanc : la critique existe grâce au lecteur mais est liée au roman)
+Reader "1" o-- "0..*" Review : writes >
+Novel "1" o-- "0..*" Review : receives >
+
+' Associations
+Author "1" -- "0..*" Novel : creates >
+Reader "0..*" -- "0..*" Novel : follows >
+Authenticated_user "1" -- "0..*" Notification : receives >
+
+@enduml

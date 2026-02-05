@@ -1,0 +1,48 @@
+@startuml activity diagram reading
+header Diagramme d'Activité - Parcours de Lecture
+skinparam conditionStyle diamond
+
+start
+
+:Rechercher un Roman;
+:Consulter la page de présentation;
+
+if (Le synopsis plaît ?) then (non)
+  stop
+else (oui)
+  :Commencer la lecture du Chapitre 1;
+  
+  repeat
+    :Lire le contenu du chapitre;
+    :Mettre à jour la progression de lecture;
+    
+    if (Passage au chapitre suivant ?) then (oui)
+      :Charger le chapitre suivant;
+    else (non)
+      break
+    endif
+  repeat while (Fin du roman atteinte ?) is (non)
+
+  partition "Interactions (Utilisateur Connecté)" {
+    if (Utilisateur authentifié ?) then (oui)
+      fork
+        if (Ajouter à la bibliothèque ?) then (oui)
+          :Enregistrer le lien Novel-User;
+          :Activer les notifications de mise à jour;
+        endif
+      fork again
+        if (Laisser une critique ?) then (oui)
+          :Saisir une note (étoiles);
+          :Rédiger un commentaire;
+          :Publier la Review;
+          :Recalculer la moyenne du Roman;
+        endif
+      end fork
+    else (non)
+      :Proposer de créer un compte;
+    endif
+  }
+endif
+
+stop
+@enduml

@@ -1,0 +1,40 @@
+@startuml activity diagram
+header Diagramme d'Activité - Soumission de Contenu
+skinparam conditionStyle diamond
+
+start
+
+:L'auteur rédige le chapitre;
+:Cliquer sur "Publier";
+
+if (Contenu valide (non vide) ?) then (non)
+  :Afficher Erreur;
+  stop
+else (oui)
+  :Passer le statut en "En attente";
+  
+  fork
+    :Vérification automatique (anti-spam);
+  fork again
+    :Extraction des mots-clés (tags);
+  end fork
+
+  if (Spam détecté ?) then (oui)
+    :Bloquer la publication;
+    :Notifier l'Auteur;
+    detach
+  else (non)
+    :Vérification par un Modérateur (optionnel);
+    if (Conforme aux règles ?) then (oui)
+      :Passer le statut en "Publié";
+      :Incrémenter compteur de chapitres;
+      :Envoyer Notifications aux abonnés;
+    else (non)
+      :Rejeter le chapitre;
+      :Demander modifications;
+    endif
+  endif
+endif
+
+stop
+@enduml

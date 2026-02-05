@@ -1,0 +1,40 @@
+@startuml state diagram
+header Diagramme d'États - Classe Novel
+skinparam monochrome true
+skinparam shadowing false
+
+[*] --> Draft : createNovel()
+
+state Draft {
+  Draft : description = "Invisible pour les lecteurs"
+  Draft : Le contenu peut être modifié librement
+}
+
+state Published {
+  state Active {
+    Active : Le roman apparaît dans les recherches
+    Active : Les lecteurs reçoivent des notifications
+  }
+  
+  state Hiatus {
+    Hiatus : "En pause"
+  }
+  
+  state Completed {
+    Completed : "Terminé"
+    Completed : Statut final pour les archives
+  }
+}
+
+Draft --> Active : publishFirstChapter()
+Active --> Hiatus : markAsHiatus() [si > 1 mois sans maj]
+Hiatus --> Active : publishChapter()
+Active --> Completed : markAsCompleted()
+Completed --> Active : addSideStory()
+
+state Deleted <<history>>
+[*] --> Deleted : deleteAction()
+Draft --> [*] : delete()
+Published --> [*] : archive()
+
+@enduml

@@ -1,0 +1,22 @@
+@startuml sequence diagram review submission
+header Diagramme de Séquence - Laisser une Critique
+actor Reader as R
+participant "UI : NovelPage" as UI
+participant "newReview : Review" as REV
+participant "novel : Novel" as N
+
+R -> UI : submitReview(stars, comment)
+activate UI
+create REV
+UI -> REV : new(readerId, stars, comment)
+
+UI -> N : addReview(REV)
+activate N
+N -> N : calculateNewAverage()
+note right: average = (totalStars / reviewCount)
+N --> UI : updatedRating
+deactivate N
+
+UI --> R : displayReview()
+deactivate UI
+@enduml

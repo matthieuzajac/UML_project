@@ -1,0 +1,42 @@
+@startuml sequence diagram chapter publication
+header Diagramme de Séquence - Publication d'un Chapitre
+actor Author as A
+participant "UI : Interface" as UI
+participant "novel : Novel" as N
+participant "newChapter : Chapter" as C
+participant "notifSystem : Notification" as NS
+database "Database" as DB
+
+A -> UI : click "Publish Chapter"
+UI -> A : request(title, content)
+A -> UI : inputData(title, content)
+
+UI -> N : createChapter(title, content)
+activate N
+
+create C
+N -> C : new(title, content, wordCount)
+activate C
+C --> N : chapterObject
+deactivate C
+
+N -> DB : save(newChapter)
+activate DB
+DB --> N : success
+deactivate DB
+
+N -> N : updateRating()
+
+N -> NS : notifyFollowers(novelId, msg)
+activate NS
+NS -> DB : getFollowers(novelId)
+DB --> NS : listReaders
+NS -> NS : send()
+NS --> N : done
+deactivate NS
+
+N --> UI : displayStatus("Published!")
+deactivate N
+UI --> A : showSuccessMsg()
+
+@enduml

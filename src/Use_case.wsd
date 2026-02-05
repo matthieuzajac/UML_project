@@ -1,0 +1,68 @@
+@startuml usecase
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Guest" as G
+actor "Authenticated_User" as AU
+actor "Reader" as R
+actor "Author" as A
+actor "Moderator" as M
+
+' Héritage des acteurs (cohérent avec votre diagramme de classe)
+AU <|-- R
+AU <|-- A
+AU <|-- M
+
+rectangle "Webnovel System (Royal Road Clone)" {
+    
+    ' Cas d'utilisation pour les invités
+    (Search Novel) as UC1
+    (Read Public Chapter) as UC2
+    
+    ' Cas d'utilisation pour les utilisateurs connectés
+    (Manage Profile) as UC3
+    (Receive Notifications) as UC4
+    
+    ' Cas d'utilisation spécifiques au Lecteur
+    (Post Review/Rating) as UC5
+    (Manage Library) as UC6
+    (Subscribe to Novel) as UC7
+    
+    ' Cas d'utilisation spécifiques à l'Auteur
+    (Create/Edit Novel) as UC8
+    (Publish Chapter) as UC9
+    (View Analytics) as UC10
+    
+    ' Cas d'utilisation spécifiques au Modérateur
+    (Delete Review) as UC11
+    (Ban User) as UC12
+
+    ' Relations Inclusion/Extension
+    (Login) as UC_Login
+    UC3 ..> UC_Login : <<include>>
+    UC5 ..> UC_Login : <<include>>
+    UC8 ..> UC_Login : <<include>>
+    
+    (Report Content) as UC13
+    UC2 <.. UC13 : <<extend>>
+}
+
+' Liaisons Acteurs -> Cas d'utilisation
+G --> UC1
+G --> UC2
+
+AU --> UC3
+AU --> UC4
+
+R --> UC5
+R --> UC6
+R --> UC7
+
+A --> UC8
+A --> UC9
+A --> UC10
+
+M --> UC11
+M --> UC12
+
+@enduml

@@ -1,0 +1,23 @@
+@startuml sequence diagram moderation
+header Diagramme de Séquence - Modération
+actor Moderator as M
+participant "UI : AdminPanel" as UI
+participant "novel : Novel" as N
+participant "author : Author" as A
+participant "notif : Notification" as NS
+
+M -> UI : reportList.view(novelId)
+UI -> N : getFlags()
+N --> UI : listReports
+
+M -> UI : takeAction("Shadowban")
+activate UI
+UI -> N : setStatus(SHADOWBANNED)
+N -> N : hideFromSearch()
+
+UI -> NS : createNotif(authorId, "Content Violated Rules")
+NS -> A : sendEmail()
+
+UI --> M : success("Novel Moderated")
+deactivate UI
+@enduml

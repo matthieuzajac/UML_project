@@ -1,0 +1,18 @@
+@startuml adding novel to library
+header Diagramme de Séquence - Ajouter à la Bibliothèque
+actor Reader as R
+participant "UI : Interface" as UI
+participant "lib : Library" as L
+participant "novel : Novel" as N
+
+R -> UI : click "Add to Library"
+UI -> L : addNovel(novelId)
+activate L
+L -> N : getDetails()
+N --> L : title, author
+L -> L : checkDuplicate()
+L -> DB : saveRelation(readerId, novelId)
+L --> UI : confirmation
+deactivate L
+UI --> R : show "Added to Library"
+@enduml
