@@ -18,6 +18,7 @@ state Published {
   
   state Hiatus {
     Hiatus : "En pause"
+    Hiatus : Toujours visible mais marqué comme inactif
   }
   
   state Completed {
@@ -26,15 +27,30 @@ state Published {
   }
 }
 
+state Shadowbanned {
+  Shadowbanned : Masqué des recherches publiques
+  Shadowbanned : Accessible uniquement par lien direct
+  Shadowbanned : En attente de révision modérateur
+}
+
+state Deleted {
+  Deleted : Supprimé définitivement
+  Deleted : Données archivées ou purgées
+}
+
 Draft --> Active : publishFirstChapter()
 Active --> Hiatus : markAsHiatus() [si > 1 mois sans maj]
 Hiatus --> Active : publishChapter()
 Active --> Completed : markAsCompleted()
 Completed --> Active : addSideStory()
 
-state Deleted <<history>>
-[*] --> Deleted : deleteAction()
-Draft --> [*] : delete()
-Published --> [*] : archive()
+Active --> Shadowbanned : moderatorAction() [violation des règles]
+Hiatus --> Shadowbanned : moderatorAction() [violation des règles]
+Shadowbanned --> Active : moderatorReview() [approuvé]
+Shadowbanned --> Deleted : moderatorAction() [violation grave]
+
+Draft --> Deleted : deleteByAuthor()
+Published --> Deleted : deleteByModerator()
+Deleted --> [*]
 
 @enduml

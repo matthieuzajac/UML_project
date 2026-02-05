@@ -1,0 +1,220 @@
+@startuml package diagram
+header Diagramme de Packages - Organisation Logique du Système
+
+skinparam packageStyle rectangle
+
+package "Presentation Layer" {
+    package "Web Interface" {
+        [Pages]
+        [Components]
+        [Forms]
+        [Layouts]
+    }
+    
+    package "Mobile Interface" {
+        [Screens]
+        [Native Components]
+        [Navigation]
+    }
+    
+    package "API Controllers" {
+        [AuthController]
+        [UserController]
+        [NovelController]
+        [ChapterController]
+        [ReviewController]
+        [ModerationController]
+    }
+}
+
+package "Business Logic Layer" {
+    package "User Domain" {
+        [Authenticated_user]
+        [Reader]
+        [Author]
+        [Moderator]
+        [Authentication]
+        [Profile Management]
+    }
+    
+    package "Content Domain" {
+        [Novel]
+        [Chapter]
+        [Genre]
+        [Tag]
+        [Content Validation]
+    }
+    
+    package "Engagement Domain" {
+        [Review]
+        [Rating System]
+        [Subscription]
+        [Library]
+        [Reading Progress]
+    }
+    
+    package "Notification Domain" {
+        [Notification]
+        [Notification Rules]
+        [Delivery System]
+    }
+    
+    package "Moderation Domain" {
+        [Report]
+        [Moderation Actions]
+        [Anti-Spam]
+        [Content Filtering]
+    }
+    
+    package "Analytics Domain" {
+        [View Tracking]
+        [Statistics]
+        [Metrics Aggregation]
+    }
+}
+
+package "Service Layer" {
+    package "Core Services" {
+        [AuthenticationService]
+        [UserService]
+        [NovelService]
+        [ChapterService]
+    }
+    
+    package "Feature Services" {
+        [ReviewService]
+        [NotificationService]
+        [SearchService]
+        [SubscriptionService]
+    }
+    
+    package "Support Services" {
+        [ModerationService]
+        [AnalyticsService]
+        [ReportingService]
+    }
+}
+
+package "Data Access Layer" {
+    package "Repositories" {
+        [UserRepository]
+        [NovelRepository]
+        [ChapterRepository]
+        [ReviewRepository]
+        [NotificationRepository]
+        [ReportRepository]
+    }
+    
+    package "Data Mappers" {
+        [ORM Mappers]
+        [DTO Converters]
+    }
+}
+
+package "Infrastructure Layer" {
+    package "External Services" {
+        [Email Provider]
+        [File Storage]
+        [Search Engine]
+        [Cache Provider]
+    }
+    
+    package "Cross-Cutting Concerns" {
+        [Logging]
+        [Security]
+        [Error Handling]
+        [Validation]
+    }
+    
+    package "Database" {
+        database "Relational DB" {
+            [Tables]
+            [Indexes]
+            [Constraints]
+        }
+        
+        database "Cache DB" {
+            [Key-Value Store]
+        }
+        
+        database "Search Index" {
+            [Document Store]
+        }
+    }
+}
+
+' Presentation to Business Logic
+[AuthController] --> [Authentication]
+[UserController] --> [Authenticated_user]
+[NovelController] --> [Novel]
+[ChapterController] --> [Chapter]
+[ReviewController] --> [Review]
+[ModerationController] --> [Moderation Actions]
+
+' Business Logic to Services
+[Authentication] --> [AuthenticationService]
+[Authenticated_user] --> [UserService]
+[Novel] --> [NovelService]
+[Chapter] --> [ChapterService]
+[Review] --> [ReviewService]
+[Subscription] --> [SubscriptionService]
+[Notification] --> [NotificationService]
+[Report] --> [ModerationService]
+
+' Services to Data Access
+[AuthenticationService] --> [UserRepository]
+[UserService] --> [UserRepository]
+[NovelService] --> [NovelRepository]
+[ChapterService] --> [ChapterRepository]
+[ReviewService] --> [ReviewRepository]
+[NotificationService] --> [NotificationRepository]
+[ModerationService] --> [ReportRepository]
+[SearchService] --> [NovelRepository]
+
+' Data Access to Infrastructure
+[UserRepository] --> [ORM Mappers]
+[NovelRepository] --> [ORM Mappers]
+[ChapterRepository] --> [ORM Mappers]
+[ReviewRepository] --> [ORM Mappers]
+
+[ORM Mappers] --> [Tables]
+
+' Services to Infrastructure
+[NotificationService] --> [Email Provider]
+[NovelService] --> [File Storage]
+[SearchService] --> [Search Engine]
+[AuthenticationService] --> [Cache Provider]
+[NovelService] --> [Cache Provider]
+
+' Cross-cutting concerns
+[AuthenticationService] ..> [Security] : uses
+[UserService] ..> [Logging] : uses
+[NovelService] ..> [Validation] : uses
+[ChapterService] ..> [Error Handling] : uses
+
+note right of "Presentation Layer"
+    Gère l'interface utilisateur
+    et les requêtes HTTP/WebSocket
+end note
+
+note right of "Business Logic Layer"
+    Contient la logique métier
+    et les règles de gestion
+end note
+
+note right of "Service Layer"
+    Orchestre les opérations
+    et coordonne les domaines
+end note
+
+note right of "Data Access Layer"
+    Gère l'accès aux données
+    et les transformations
+end note
+
+note right of "Infrastructure Layer"
+    Services techniques
+    et intégrations externes
+end note
+
+@enduml

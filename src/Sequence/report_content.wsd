@@ -1,0 +1,108 @@
+@startuml sequence diagram report content
+header Diagramme de Séquence - Signalement de Contenu
+actor "User" as U
+participant "UI : Interface" as UI
+participant "report : Report" as REP
+participant "notif : NotificationService" as NS
+database "Database" as DB
+
+== Submit Report ==
+U -> UI : click "Report"
+UI -> UI : showReportDialog(contentType, contentId)
+U -> UI : selectReason(reason, details)
+
+UI -> REP : createReport(userId, contentType, contentId, reason, details)
+activate REP
+
+create REP
+REP -> REP : validate()
+
+REP -> DB : save()
+activate DB
+DB --> REP : reportId
+deactivate DB
+
+REP -> NS : notifyModerators(reportId)
+activate NS
+NS -> DB : getActiveModerators()
+activate DB
+DB --> NS : moderatorList
+deactivate DB
+
+loop for each moderator
+    NS -> NS : createNotification(modId, "New report", SYSTEM_MESSAGE)
+    NS -> DB : saveNotification()
+    activate DB
+    DB --> NS : success
+    deactivate DB
+end
+
+NS --> REP : moderatorsNotified
+deactivate NS
+
+REP --> UI : reportSubmitted(reportId)
+deactivate REP
+
+UI --> U : show "Report submitted. Thank you!"
+
+== Moderator Review Report ==
+actor Moderator as M
+
+M -> UI : viewReports()
+UI -> DB : getReports(status=PENDING)
+activate DB
+DB --> UI : reportList
+deactivate DB
+UI --> M : displayReports()
+
+M -> UI : selectReport(reportId)
+UI -> DB : getReportDetails(reportId)
+activate DB
+DB --> UI : reportData
+deactivate DB
+UI --> M : showReportDetails()
+
+alt Violation Confirmed
+    M -> UI : takeAction("shadowban")
+    UI -> REP : resolve(reportId, action="shadowban")
+    activate REP
+    
+    REP -> DB : updateReportStatus(RESOLVED)
+    activate DB
+    DB --> REP : success
+    deactivate DB
+    
+    REP -> DB : updateContentStatus(contentId, SHADOWBANNED)
+    activate DB
+    DB --> REP : success
+    deactivate DB
+    
+    REP -> NS : notifyContentOwner(ownerId, action)
+    activate NS
+    NS -> NS : createNotification(ownerId, "Content moderated", MODERATION_ACTION)
+    NS -> DB : saveNotification()
+    activate DB
+    DB --> NS : success
+    deactivate DB
+    deactivate NS
+    
+    REP --> UI : actionTaken
+    deactivate REP
+    UI --> M : show "Action completed"
+    
+else No Violation
+    M -> UI : takeAction("dismiss")
+    UI -> REP : dismiss(reportId)
+    activate REP
+    
+    REP -> DB : updateReportStatus(DISMISSED)
+    activate DB
+    DB --> REP : success
+    deactivate DB
+    
+    REP --> UI : dismissed
+    deactivate REP
+    UI --> M : show "Report dismissed"
+end
+
+@enduml

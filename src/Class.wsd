@@ -6,15 +6,21 @@ abstract class Authenticated_user {
     # username : std::string
     # email : std::string
     # password_hash : std::string
+    # created_at : std::string
+    # is_banned : bool
+    # is_shadowbanned : bool
     + login() : bool
     + logout() : void
     + updateProfile() : void
+    + resetPassword(token : std::string) : bool
 }
 
 class Reader {
     - reading_points : int
     + addBookmark(novelId : int) : void
-    + postReview(content : std::string, stars : int) : void
+    + postReview(novelId : int, content : std::string, stars : int) : void
+    + getLibrary() : std::vector<Novel*>
+    + subscribeToNovel(novelId : int) : void
 }
 
 class Author {
@@ -22,44 +28,141 @@ class Author {
     - bio : std::string
     + createNovel(title : std::string) : void
     + publishChapter(novelId : int, content : std::string) : void
+    + viewAnalytics(novelId : int) : Statistics
 }
 
 class Moderator {
     - mod_level : int
     + deleteReview(reviewId : int) : void
     + shadowBanUser(userId : int) : void
+    + banUser(userId : int) : void
+    + moderateContent(contentId : int) : void
 }
 
 class Novel {
     - id : int
     - title : std::string
     - synopsis : std::string
+    - cover_image_url : std::string
     - average_rating : float
+    - total_views : long
+    - total_chapters : int
     - status : NovelStatus
+    - created_at : std::string
+    - updated_at : std::string
     + updateRating() : void
     + getChapters() : std::vector<Chapter*>
+    + getFollowerCount() : int
+    + updateStatus(newStatus : NovelStatus) : void
 }
 
 class Chapter {
+    - id : int
     - chapter_number : int
     - title : std::string
     - content : std::string
     - word_count : int
+    - view_count : long
+    - published_at : std::string
+    - is_premium : bool
     + displayContent() : std::string
+    + incrementViews() : void
 }
 
 class Review {
     - id : int
+    - novel_id : int
+    - reader_id : int
     - content : std::string
     - rating : int
     - date_posted : std::string
+    - helpful_count : int
     + editContent(newContent : std::string) : void
+    + markHelpful() : void
 }
 
 class Notification {
+    - id : int
+    - user_id : int
     - message : std::string
+    - type : NotificationType
     - is_read : bool
+    - created_at : std::string
     + send() : void
+    + markAsRead() : void
+}
+
+class Library {
+    - reader_id : int
+    - novel_id : int
+    - last_read_chapter : int
+    - added_at : std::string
+    - reading_status : ReadingStatus
+    + updateProgress(chapterNumber : int) : void
+    + remove(novelId : int) : void
+}
+
+class Subscription {
+    - reader_id : int
+    - novel_id : int
+    - subscribed_at : std::string
+    - notify_on_update : bool
+    + unsubscribe() : void
+}
+
+class Genre {
+    - id : int
+    - name : std::string
+    - description : std::string
+    + getNovels() : std::vector<Novel*>
+}
+
+class Tag {
+    - id : int
+    - name : std::string
+    + getNovels() : std::vector<Novel*>
+}
+
+class Report {
+    - id : int
+    - reporter_id : int
+    - content_type : std::string
+    - content_id : int
+    - reason : std::string
+    - status : ReportStatus
+    - created_at : std::string
+    + resolve() : void
+}
+
+enum NovelStatus {
+    DRAFT
+    ACTIVE
+    HIATUS
+    COMPLETED
+    SHADOWBANNED
+    DELETED
+}
+
+enum NotificationType {
+    NEW_CHAPTER
+    NEW_REVIEW
+    SYSTEM_MESSAGE
+    MODERATION_ACTION
+}
+
+enum ReadingStatus {
+    READING
+    COMPLETED
+    ON_HOLD
+    DROPPED
+    PLAN_TO_READ
+}
+
+enum ReportStatus {
+    PENDING
+    REVIEWED
+    RESOLVED
+    DISMISSED
 }
 
 ' Héritage
@@ -76,7 +179,14 @@ Novel "1" o-- "0..*" Review : receives >
 
 ' Associations
 Author "1" -- "0..*" Novel : creates >
-Reader "0..*" -- "0..*" Novel : follows >
 Authenticated_user "1" -- "0..*" Notification : receives >
+Reader "1" -- "0..*" Library : manages >
+Novel "1" -- "0..*" Library : appears_in >
+Reader "1" -- "0..*" Subscription : has >
+Novel "1" -- "0..*" Subscription : has_subscribers >
+Novel "0..*" -- "1..*" Genre : belongs_to >
+Novel "0..*" -- "0..*" Tag : tagged_with >
+Authenticated_user "1" -- "0..*" Report : creates >
+Moderator "0..1" -- "0..*" Report : handles >
 
 @enduml

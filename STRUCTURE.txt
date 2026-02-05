@@ -1,0 +1,73 @@
+Royal Road Clone - UML Documentation Project Structure
+======================================================
+
+Root Directory
+ README.md                      - Complete project documentation
+ QUICK_START.md                 - Getting started guide
+ DIAGRAM_INDEX.md               - Navigate all 19 diagrams
+ COHERENCE_VALIDATION.md        - Validation report (all diagrams coherent)
+ .gitignore                     - PlantUML project .gitignore
+ src/                           - All UML diagrams
+
+Structural Diagrams (5)
+ src/Class.wsd                  - Domain model (entities, relationships)
+ src/Component.wsd              - System architecture (services, layers)
+ src/Package.wsd                - Logical organization (packages)
+ src/Deployment.wsd             - Infrastructure (deployment topology)
+ src/Object.wsd                 - Runtime example (concrete instances)
+
+Behavioral Diagrams - Overview (3)
+ src/Use_case.wsd               - All use cases (23 use cases, 5 actors)
+ src/States.wsd                 - Novel lifecycle (6 states)
+ src/Timing.wsd                 - Real-time notification flow
+
+Behavioral Diagrams - Activity (4)
+ src/Activity/reading.wsd       - Reader journey workflow
+ src/Activity/search.wsd        - Search & discovery workflow
+ src/Activity/author_workflow.wsd - Complete author workflow
+ src/Activity/soumission.wsd    - Content submission workflow
+
+Behavioral Diagrams - Sequence (7)
+ src/Sequence/authentication.wsd - Login & registration
+ src/Sequence/chapter_publish.wsd - Chapter publication
+ src/Sequence/library.wsd       - Library management
+ src/Sequence/subscription.wsd  - Subscribe/unsubscribe & notifications
+ src/Sequence/reviewing.wsd     - Review submission
+ src/Sequence/moderation.wsd    - Content moderation
+ src/Sequence/report_content.wsd - Content reporting
+
+Quick Statistics
+================
+Total Diagrams:        19
+- Structural:          5
+- Behavioral:          14
+
+Total Documentation:   4 markdown files
+Lines of UML Code:     ~1,500 lines
+Entities Modeled:      13 classes + 4 enums
+Use Cases:             23
+Actors:                5 (Guest, Authenticated_user, Reader, Author, Moderator)
+Services:              15+ microservices
+Infrastructure:        10+ deployment nodes
+
+Key Features Modeled
+====================
+ User authentication & authorization
+ Novel creation & management
+ Chapter writing & publishing
+ Reading progress tracking
+ Search & discovery (genres, tags, filters)
+ Reviews & ratings system
+ Library management
+ Subscription & notifications (real-time + email)
+ Content moderation
+ User reporting system
+ Ban & shadowban mechanisms
+ Author analytics
+ Anti-spam filtering
+ Premium content support
+ Novel status management
+
+Coherence Status: ✅ 100% COHERENT
+All diagrams cross-referenced and validated.
+See COHERENCE_VALIDATION.md for details.

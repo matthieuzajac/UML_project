@@ -1,0 +1,149 @@
+@startuml component diagram
+header Diagramme de Composants - Architecture Système
+
+skinparam componentStyle rectangle
+
+package "Frontend Layer" {
+    [Web UI] as WebUI
+    [Mobile App] as MobileApp
+}
+
+package "API Gateway" {
+    [REST API] as API
+    [WebSocket Server] as WS
+}
+
+package "Application Services" {
+    component [Authentication Service] as AuthService
+    component [User Service] as UserService
+    component [Novel Service] as NovelService
+    component [Chapter Service] as ChapterService
+    component [Review Service] as ReviewService
+    component [Notification Service] as NotificationService
+    component [Search Service] as SearchService
+    component [Moderation Service] as ModerationService
+    component [Analytics Service] as AnalyticsService
+}
+
+package "Core Business Logic" {
+    component [User Management] as UserMgmt
+    component [Content Management] as ContentMgmt
+    component [Library Management] as LibraryMgmt
+    component [Subscription Management] as SubMgmt
+    component [Rating System] as RatingSystem
+    component [Reporting System] as ReportSystem
+}
+
+package "Infrastructure Services" {
+    component [Email Service] as EmailService
+    component [File Storage] as FileStorage
+    component [Cache Service] as CacheService
+    component [Anti-Spam Filter] as AntiSpam
+    component [Search Engine] as SearchEngine
+}
+
+database "Primary Database" as DB {
+    [Users]
+    [Novels]
+    [Chapters]
+    [Reviews]
+    [Notifications]
+    [Reports]
+    [Subscriptions]
+    [Libraries]
+}
+
+database "Cache Database" as CacheDB {
+    [Session Cache]
+    [Query Cache]
+    [Popular Content]
+}
+
+database "Search Index" as SearchIndex {
+    [Novel Index]
+    [Tag Index]
+    [Author Index]
+}
+
+' Frontend connections
+WebUI --> API : HTTP/HTTPS
+WebUI --> WS : WebSocket
+MobileApp --> API : HTTP/HTTPS
+MobileApp --> WS : WebSocket
+
+' API Gateway to Services
+API --> AuthService
+API --> UserService
+API --> NovelService
+API --> ChapterService
+API --> ReviewService
+API --> NotificationService
+API --> SearchService
+API --> ModerationService
+API --> AnalyticsService
+
+WS --> NotificationService : Real-time notifications
+
+' Services to Business Logic
+AuthService --> UserMgmt
+UserService --> UserMgmt
+NovelService --> ContentMgmt
+ChapterService --> ContentMgmt
+ReviewService --> RatingSystem
+NotificationService --> SubMgmt
+SearchService --> ContentMgmt
+ModerationService --> ReportSystem
+AnalyticsService --> ContentMgmt
+
+' Business Logic to Infrastructure
+ContentMgmt --> FileStorage : Store covers/images
+UserMgmt --> EmailService : Send verification
+NovelService --> AntiSpam : Validate content
+ChapterService --> AntiSpam : Validate content
+SearchService --> SearchEngine : Index/Query
+NotificationService --> EmailService : Send notifications
+SubMgmt --> NotificationService : Trigger alerts
+
+' Database connections
+UserMgmt --> DB
+ContentMgmt --> DB
+LibraryMgmt --> DB
+SubMgmt --> DB
+RatingSystem --> DB
+ReportSystem --> DB
+
+' Cache connections
+AuthService --> CacheService : Store sessions
+SearchService --> CacheService : Cache results
+NovelService --> CacheService : Cache popular novels
+
+CacheService --> CacheDB
+SearchEngine --> SearchIndex
+
+note right of AntiSpam
+    Prevents spam content
+    and abusive behavior
+end note
+
+note right of SearchEngine
+    Full-text search
+    Advanced filtering
+    Ranking algorithm
+end note
+
+note bottom of DB
+    PostgreSQL/MySQL
+    Relational data storage
+end note
+
+note bottom of CacheDB
+    Redis/Memcached
+    Session & query cache
+end note
+
+note bottom of SearchIndex
+    Elasticsearch
+    Full-text search index
+end note
+
+@enduml

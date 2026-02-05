@@ -4,16 +4,28 @@ actor Reader as R
 participant "UI : NovelPage" as UI
 participant "newReview : Review" as REV
 participant "novel : Novel" as N
+database "Database" as DB
 
 R -> UI : submitReview(stars, comment)
 activate UI
 create REV
-UI -> REV : new(readerId, stars, comment)
+UI -> REV : new(readerId, novelId, stars, comment)
+activate REV
+
+REV -> DB : save()
+activate DB
+DB --> REV : success
+deactivate DB
+deactivate REV
 
 UI -> N : addReview(REV)
 activate N
 N -> N : calculateNewAverage()
 note right: average = (totalStars / reviewCount)
+N -> DB : updateRating(average)
+activate DB
+DB --> N : success
+deactivate DB
 N --> UI : updatedRating
 deactivate N
 

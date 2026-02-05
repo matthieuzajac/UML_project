@@ -1,0 +1,72 @@
+@startuml activity diagram search
+header Diagramme d'Activité - Recherche de Romans
+skinparam conditionStyle diamond
+
+start
+
+:Accéder à la page de recherche;
+
+partition "Critères de Recherche" {
+    fork
+        :Saisir mots-clés (titre/auteur);
+    fork again
+        :Sélectionner genres;
+    fork again
+        :Sélectionner tags;
+    fork again
+        :Filtrer par statut (Actif/Complété/Hiatus);
+    fork again
+        :Filtrer par note minimale;
+    end fork
+}
+
+:Lancer la recherche;
+
+:Récupérer les résultats de la base de données;
+
+if (Résultats trouvés ?) then (oui)
+    partition "Tri et Affichage" {
+        :Trier les résultats;
+        note right
+            Options de tri :
+            - Popularité (vues)
+            - Note moyenne
+            - Date de publication
+            - Dernière mise à jour
+            - Nombre de chapitres
+        end note
+        
+        :Afficher la liste des romans;
+        
+        repeat
+            :Consulter un roman de la liste;
+            
+            if (Le roman intéresse ?) then (oui)
+                :Accéder à la page du roman;
+                stop
+            else (non)
+                :Retourner à la liste;
+            endif
+            
+        repeat while (Autre roman à consulter ?) is (oui)
+    }
+    
+    if (Sauvegarder les critères ?) then (oui)
+        if (Utilisateur authentifié ?) then (oui)
+            :Enregistrer les préférences de recherche;
+        else (non)
+            :Stocker dans le cache local;
+        endif
+    endif
+    
+else (non)
+    :Afficher "Aucun résultat trouvé";
+    
+    if (Suggérer des alternatives ?) then (oui)
+        :Proposer romans similaires;
+        :Proposer romans populaires;
+    endif
+endif
+
+stop
+@enduml

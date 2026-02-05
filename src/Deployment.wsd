@@ -1,0 +1,212 @@
+@startuml deployment diagram
+header Diagramme de Déploiement - Infrastructure Système
+
+skinparam componentStyle rectangle
+
+node "Client Devices" {
+    artifact "Web Browser" as Browser
+    artifact "Mobile App (iOS/Android)" as Mobile
+}
+
+node "CDN (Content Delivery Network)" {
+    artifact "Static Assets" as CDN
+    artifact "Image Cache" as ImgCache
+}
+
+node "Load Balancer" {
+    component "Nginx" as LB
+}
+
+node "Web Servers Cluster" {
+    node "Web Server 1" {
+        component "Frontend App" as Frontend1
+    }
+    node "Web Server 2" {
+        component "Frontend App" as Frontend2
+    }
+    node "Web Server N" {
+        component "Frontend App" as FrontendN
+    }
+}
+
+node "Application Servers Cluster" {
+    node "App Server 1" {
+        component "API Service" as API1
+        component "WebSocket Server" as WS1
+    }
+    node "App Server 2" {
+        component "API Service" as API2
+        component "WebSocket Server" as WS2
+    }
+    node "App Server N" {
+        component "API Service" as APIN
+        component "WebSocket Server" as WSN
+    }
+}
+
+node "Database Cluster" {
+    database "Primary DB\n(Master)" as DBMaster {
+        [Users]
+        [Novels]
+        [Chapters]
+        [Reviews]
+    }
+    
+    database "Read Replica 1\n(Slave)" as DBSlave1 {
+        [Replicated Data]
+    }
+    
+    database "Read Replica 2\n(Slave)" as DBSlave2 {
+        [Replicated Data]
+    }
+}
+
+node "Cache Layer" {
+    database "Redis Cluster" as Redis {
+        [Session Store]
+        [Query Cache]
+        [Rate Limiting]
+    }
+}
+
+node "Search Infrastructure" {
+    database "Elasticsearch\nCluster" as ES {
+        [Novel Index]
+        [Full-Text Search]
+    }
+}
+
+node "Storage Services" {
+    cloud "Object Storage\n(S3/MinIO)" as ObjectStorage {
+        artifact "Cover Images" as Covers
+        artifact "User Avatars" as Avatars
+        artifact "Backups" as Backups
+    }
+}
+
+node "Background Services" {
+    component "Job Queue\n(RabbitMQ/Redis)" as Queue
+    component "Worker 1\n(Notifications)" as Worker1
+    component "Worker 2\n(Email)" as Worker2
+    component "Worker 3\n(Analytics)" as Worker3
+}
+
+node "External Services" {
+    cloud "Email Service\n(SendGrid/AWS SES)" as EmailProvider
+    cloud "Monitoring\n(Prometheus/Grafana)" as Monitoring
+    cloud "Logging\n(ELK Stack)" as Logging
+}
+
+' Client connections
+Browser --> CDN : HTTPS
+Mobile --> CDN : HTTPS
+Browser --> LB : HTTPS
+Mobile --> LB : HTTPS
+
+CDN --> ObjectStorage : Fetch images
+
+' Load balancer to web servers
+LB --> Frontend1 : HTTP
+LB --> Frontend2 : HTTP
+LB --> FrontendN : HTTP
+
+' Frontend to API
+Frontend1 --> API1 : HTTP/WebSocket
+Frontend2 --> API2 : HTTP/WebSocket
+FrontendN --> APIN : HTTP/WebSocket
+
+' API to databases
+API1 --> DBMaster : Write operations
+API1 --> DBSlave1 : Read operations
+API2 --> DBMaster : Write operations
+API2 --> DBSlave2 : Read operations
+APIN --> DBMaster : Write operations
+APIN --> DBSlave1 : Read operations
+
+' Database replication
+DBMaster --> DBSlave1 : Replication
+DBMaster --> DBSlave2 : Replication
+
+' API to cache and search
+API1 --> Redis : Cache operations
+API2 --> Redis : Cache operations
+APIN --> Redis : Cache operations
+
+API1 --> ES : Search queries
+API2 --> ES : Search queries
+APIN --> ES : Search queries
+
+' API to storage
+API1 --> ObjectStorage : Upload/Download
+API2 --> ObjectStorage : Upload/Download
+APIN --> ObjectStorage : Upload/Download
+
+' API to job queue
+API1 --> Queue : Enqueue jobs
+API2 --> Queue : Enqueue jobs
+APIN --> Queue : Enqueue jobs
+
+' Workers
+Queue --> Worker1 : Dequeue jobs
+Queue --> Worker2 : Dequeue jobs
+Queue --> Worker3 : Dequeue jobs
+
+Worker1 --> DBMaster : Update notifications
+Worker1 --> WS1 : Push notifications
+Worker1 --> WS2 : Push notifications
+
+Worker2 --> EmailProvider : Send emails
+
+Worker3 --> DBMaster : Update analytics
+
+' Monitoring and logging
+API1 --> Monitoring : Metrics
+API2 --> Monitoring : Metrics
+APIN --> Monitoring : Metrics
+
+API1 --> Logging : Logs
+API2 --> Logging : Logs
+APIN --> Logging : Logs
+
+note right of CDN
+    Distribue les assets statiques
+    Images de couverture
+    CSS, JS, fonts
+end note
+
+note right of LB
+    Distribution de charge
+    Health checks
+    SSL termination
+end note
+
+note bottom of DBMaster
+    PostgreSQL Master
+    Écritures uniquement
+end note
+
+note bottom of DBSlave1
+    PostgreSQL Replicas
+    Lectures uniquement
+end note
+
+note right of Redis
+    Cache en mémoire
+    Sessions utilisateur
+    Rate limiting
+end note
+
+note right of ES
+    Recherche full-text
+    Indexation des romans
+    Filtres avancés
+end note
+
+note right of Queue
+    Traitement asynchrone
+    Notifications
+    Emails
+    Analytics
+end note
+
+@enduml
