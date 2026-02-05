@@ -4,6 +4,11 @@ skinparam conditionStyle diamond
 
 start
 
+note right
+  Tout utilisateur authentifié peut lire :
+  Reader, Author (qui hérite de Reader), et Moderator
+end note
+
 :Rechercher un Roman;
 :Consulter la page de présentation;
 

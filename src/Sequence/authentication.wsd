@@ -6,6 +6,13 @@ participant "auth : AuthService" as AUTH
 participant "user : Authenticated_user" as USER
 database "Database" as DB
 
+note over USER
+  Hiérarchie d'héritage :
+  Authenticated_user <|-- Reader
+  Reader <|-- Author
+  Authenticated_user <|-- Moderator
+end note
+
 == Login Flow ==
 U -> UI : enterCredentials(email, password)
 UI -> AUTH : authenticate(email, password)

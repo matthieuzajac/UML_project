@@ -1,10 +1,16 @@
 @startuml sequence diagram review submission
 header Diagramme de Séquence - Laisser une Critique
-actor Reader as R
+actor "Reader/Author" as R
 participant "UI : NovelPage" as UI
 participant "newReview : Review" as REV
 participant "novel : Novel" as N
 database "Database" as DB
+
+note right of R
+  Un Author est aussi un Reader,
+  donc peut laisser des critiques
+  sur d'autres romans
+end note
 
 R -> UI : submitReview(stars, comment)
 activate UI

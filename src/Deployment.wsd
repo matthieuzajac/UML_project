@@ -1,3 +1,7 @@
+' NOTE: Ce diagramme de déploiement est présent mais selon les directives UML,
+' ce type de diagramme est recommandé uniquement s'il y a des entités matérielles à décrire.
+' Si aucune infrastructure physique n'est modélisée, ce diagramme pourrait ne pas être nécessaire.
+
 @startuml deployment diagram
 header Diagramme de Déploiement - Infrastructure Système
 
@@ -199,7 +203,6 @@ end note
 note right of ES
     Recherche full-text
     Indexation des romans
-    Filtres avancés
 end note
 
 note right of Queue

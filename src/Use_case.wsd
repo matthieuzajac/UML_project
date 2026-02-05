@@ -3,25 +3,26 @@ left to right direction
 skinparam packageStyle rectangle
 
 actor "Guest" as G
-actor "Authenticated_User" as AU
+actor "Authenticated User" as AU
 actor "Reader" as R
 actor "Author" as A
 actor "Moderator" as M
 
-' Héritage des acteurs (cohérent avec votre diagramme de classe)
+' Héritage des acteurs : Author hérite de Reader
+' Un Author est un Reader (peut lire, reviewer, etc.) mais un Reader n'est pas toujours un Author
 AU <|-- R
-AU <|-- A
+R <|-- A
 AU <|-- M
 
 rectangle "Webnovel System (Royal Road Clone)" {
     
-    ' Cas d'utilisation pour les invités
+    ' === Use Cases Communs (Guest) ===
     (Search Novel) as UC1
     (Read Public Chapter) as UC2
     (Browse by Genre/Tag) as UC14
     (Register Account) as UC15
     
-    ' Cas d'utilisation pour les utilisateurs connectés
+    ' === Use Cases Authenticated User ===
     (Login) as UC_Login
     (Logout) as UC_Logout
     (Manage Profile) as UC3
@@ -29,21 +30,25 @@ rectangle "Webnovel System (Royal Road Clone)" {
     (Reset Password) as UC16
     (Report Content) as UC13
     
-    ' Cas d'utilisation spécifiques au Lecteur
+    ' === Use Cases Reader (hérite des use cases Auth User) ===
+    ' Un Reader peut faire tout ce qu'un Auth User fait
+    ' + fonctionnalités de lecture spécifiques
     (Post Review/Rating) as UC5
     (Manage Library) as UC6
     (Subscribe to Novel) as UC7
     (Mark Review as Helpful) as UC17
     (Track Reading Progress) as UC18
     
-    ' Cas d'utilisation spécifiques à l'Auteur
+    ' === Use Cases Author (hérite de Reader) ===
+    ' Un Author peut faire tout ce qu'un Reader fait
+    ' + fonctionnalités d'écriture spécifiques
     (Create/Edit Novel) as UC8
     (Publish Chapter) as UC9
     (View Analytics) as UC10
     (Manage Novel Status) as UC19
     (Add Tags/Genres) as UC20
     
-    ' Cas d'utilisation spécifiques au Modérateur
+    ' === Use Cases Moderator (hérite de Auth User) ===
     (Delete Review) as UC11
     (Ban User) as UC12
     (Review Reports) as UC21
@@ -67,11 +72,13 @@ rectangle "Webnovel System (Royal Road Clone)" {
 }
 
 ' Liaisons Acteurs -> Cas d'utilisation
+' Guest
 G --> UC1
 G --> UC2
 G --> UC14
 G --> UC15
 
+' Authenticated User
 AU --> UC_Login
 AU --> UC_Logout
 AU --> UC3
@@ -79,18 +86,22 @@ AU --> UC4
 AU --> UC13
 AU --> UC16
 
+' Reader (hérite de Auth User + ajouts)
 R --> UC5
 R --> UC6
 R --> UC7
 R --> UC17
 R --> UC18
 
+' Author (hérite de Reader + ajouts)
+' Note: comme Author hérite de Reader, il peut aussi faire UC5, UC6, UC7, etc.
 A --> UC8
 A --> UC9
 A --> UC10
 A --> UC19
 A --> UC20
 
+' Moderator (hérite de Auth User + ajouts)
 M --> UC11
 M --> UC12
 M --> UC21
