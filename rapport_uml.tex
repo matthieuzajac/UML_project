@@ -1,0 +1,201 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+
+\geometry{margin=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\thepage}
+\lhead{Rapport UML - Plateforme Webnovel}
+
+\title{\textbf{Rapport de Conception UML}\\
+\large Système de Publication de Webnovels\\
+(Clone de Royal Road)}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Ce projet présente la modélisation UML complète d'une plateforme de publication et de lecture de webnovels, inspirée de Royal Road. Le système permet aux auteurs de publier leurs romans chapitres par chapitres, aux lecteurs de découvrir et suivre du contenu, et aux modérateurs d'assurer la qualité de la plateforme. Cette documentation suit rigoureusement la norme UML 2.5 et couvre les aspects statiques et dynamiques du système.
+
+\subsection{Objectifs du système}
+
+Le système vise à créer une plateforme complète où :
+\begin{itemize}[noitemsep]
+    \item Les \textbf{invités} peuvent explorer et lire du contenu public sans authentification
+    \item Les \textbf{utilisateurs authentifiés} gèrent leur profil et reçoivent des notifications
+    \item Les \textbf{lecteurs} peuvent créer une bibliothèque personnelle, s'abonner aux romans et publier des critiques
+    \item Les \textbf{auteurs} (qui héritent des capacités de lecteur) peuvent créer, publier et gérer leurs romans
+    \item Les \textbf{modérateurs} peuvent maintenir la qualité du contenu et gérer les utilisateurs problématiques
+\end{itemize}
+
+\subsection{Choix technologiques justifiés}
+
+\textbf{PlantUML} a été retenu comme outil de modélisation pour sa syntaxe textuelle permettant le versionnage via Git, sa conformité stricte à la norme UML, et sa capacité à générer automatiquement des diagrammes à partir de définitions textuelles. Cette approche favorise la collaboration et la traçabilité des modifications.
+
+\section{Vue Statique du Système}
+
+\subsection{Diagramme de Cas d'Utilisation}
+\textit{Fichier : src/Use\_case.wsd}
+
+Ce diagramme définit les frontières du système et identifie quatre acteurs principaux organisés par héritage : \texttt{Guest}, \texttt{Authenticated\_User}, \texttt{Reader}, \texttt{Author}, et \texttt{Moderator}. L'héritage reflète l'accumulation de droits : un auteur hérite des capacités d'un lecteur (lecture, critiques), qui hérite lui-même d'un utilisateur authentifié (profil, notifications).
+
+Les cas d'utilisation sont regroupés en cinq packages fonctionnels : accès invité (exploration, recherche, lecture publique, inscription), gestion de compte (authentification, profil, notifications, signalement), fonctionnalités lecteur (bibliothèque, abonnements, progression, critiques), fonctionnalités auteur (création de roman, publication de chapitres, analyse de statistiques), et outils de modération (modération de contenu, gestion des utilisateurs, traitement des signalements). Les relations \texttt{<<include>>} structurent les cas d'utilisation composites tandis que \texttt{<<extend>>} modélise les extensions optionnelles comme le signalement de contenu.
+
+\subsection{Diagramme de Classes}
+\textit{Fichier : src/Class.wsd}
+
+Le diagramme de classes constitue le cœur du modèle métier. La classe abstraite \texttt{Authenticated\_user} centralise l'authentification et la gestion de profil, avec des attributs protégés (\texttt{id}, \texttt{username}, \texttt{email}, \texttt{password\_hash}) et des indicateurs de modération (\texttt{is\_banned}, \texttt{is\_shadowbanned}).
+
+\textbf{Choix de conception majeur :} l'héritage \texttt{Authenticated\_user $\leftarrow$ Reader $\leftarrow$ Author} reflète le fait qu'un auteur est toujours un lecteur (peut lire et commenter d'autres œuvres), mais un lecteur n'est pas nécessairement auteur. \texttt{Moderator} hérite directement de \texttt{Authenticated\_user} car il possède des privilèges distincts.
+
+Les entités centrales \texttt{Novel} et \texttt{Chapter} sont liées par composition (diamant noir) : la suppression d'un roman entraîne celle de tous ses chapitres. \texttt{Review} utilise l'agrégation (diamant blanc) car elle dépend du lecteur et du roman mais possède un cycle de vie partiellement indépendant.
+
+Quatre énumérations encapsulent les états critiques : \texttt{NovelStatus} (DRAFT, ACTIVE, HIATUS, COMPLETED, SHADOWBANNED, DELETED), \texttt{NotificationType}, \texttt{ReadingStatus}, et \texttt{ReportStatus}, assurant la cohérence et la validation des transitions d'états.
+
+\subsection{Diagramme de Packages}
+\textit{Fichier : src/Package.wsd}
+
+Ce diagramme organise le système en une architecture en couches respectant le principe de séparation des responsabilités. La \textbf{couche présentation} contient les interfaces web et mobile ainsi que les contrôleurs API. La \textbf{couche logique métier} est subdivisée en six domaines : utilisateur (authentification, profils), contenu (romans, chapitres, genres, tags), engagement (critiques, abonnements, bibliothèques), notifications, modération (signalements, anti-spam), et analytique.
+
+La \textbf{couche service} orchestre les opérations transversales via des services fonctionnels. La \textbf{couche accès aux données} encapsule les repositories et mappers ORM. L'\textbf{infrastructure} fournit les services techniques (email, stockage, cache, recherche) et les préoccupations transversales (logging, sécurité, validation).
+
+\textbf{Justification :} cette architecture hexagonale isole la logique métier des détails techniques, facilitant les tests unitaires et l'évolutivité du système.
+
+\subsection{Diagramme de Composants}
+\textit{Fichier : src/Component.wsd}
+
+Le diagramme de composants illustre l'architecture technique en couches avec dépendances explicites. La couche frontend (Web UI, Mobile App) communique via une API Gateway (REST API, WebSocket Server) avec neuf services applicatifs spécialisés : Authentication, User, Novel, Chapter, Review, Notification, Search, Moderation, et Analytics.
+
+Ces services s'appuient sur des composants de logique métier (User Management, Content Management, Library Management, etc.) qui utilisent les services d'infrastructure (Email Service, File Storage, Cache Service, Anti-Spam Filter, Search Engine).
+
+\textbf{Choix architectural :} la séparation en microservices facilite la scalabilité horizontale et l'isolation des pannes. L'anti-spam est intégré au niveau infrastructure pour protéger tous les points d'entrée. Le cache (Redis) et l'index de recherche (Elasticsearch) sont découplés de la base relationnelle principale pour optimiser les performances.
+
+\subsection{Diagramme de Déploiement}
+\textit{Fichier : src/Deployment.wsd}
+
+Ce diagramme modélise l'infrastructure physique et la distribution des composants logiciels. L'architecture comprend : un CDN pour les assets statiques, un load balancer Nginx, des clusters de serveurs web (frontend) et applicatifs (API + WebSocket), une base de données PostgreSQL en configuration master-slave avec réplication, un cluster Redis pour le cache, un cluster Elasticsearch pour la recherche, du stockage objet S3/MinIO pour les images, et des workers asynchrones (RabbitMQ) pour les notifications et emails.
+
+\textbf{Justifications techniques :} la réplication master-slave sépare les écritures (master) des lectures (slaves) pour améliorer les performances. Le CDN réduit la latence globale. Les WebSockets permettent les notifications temps réel. Les workers asynchrones évitent le blocage des requêtes API lors d'opérations longues.
+
+\subsection{Diagramme d'Objets}
+\textit{Fichier : src/Object.wsd}
+
+Ce diagramme présente une instance concrète du système à un instant donné, illustrant un auteur (alice\_writer) qui a créé un roman fantasy (myNovel:Novel) avec trois chapitres, tandis qu'un lecteur (bob\_reader) a ajouté ce roman à sa bibliothèque, s'y est abonné, et a publié une critique 5 étoiles. Cette vue complète l'abstraction du diagramme de classes en montrant des valeurs réelles et l'état runtime des objets.
+
+\section{Vue Dynamique du Système}
+
+\subsection{Diagramme d'États}
+\textit{Fichier : src/State/States.wsd}
+
+Ce diagramme modélise le cycle de vie complet d'un roman à travers sept états principaux. Un roman naît en état \texttt{Draft} (invisible, éditable librement), passe à \texttt{Active} lors de la publication du premier chapitre (visible dans les recherches, notifications activées), peut être mis en \texttt{Hiatus} (pause temporaire, visible mais inactif), ou marqué \texttt{Completed} (terminé, archivé).
+
+\textbf{Transitions de modération :} les modérateurs peuvent appliquer \texttt{Shadowbanned} (masqué des recherches publiques mais accessible par lien direct) en cas de violation mineure, ou \texttt{Deleted} pour suppression définitive. Des transitions de restauration existent depuis \texttt{Shadowbanned} vers les états précédents après révision.
+
+\textbf{Choix de conception :} l'état \texttt{Shadowbanned} distinct de \texttt{Deleted} permet une modération progressive sans perte irréversible de contenu, facilitant la résolution de conflits et les appels.
+
+\subsection{Diagrammes d'Activité}
+
+\subsubsection{Lecture et Interactions (src/Activity/reading.wsd)}
+Ce workflow modélise le parcours complet d'un utilisateur depuis la recherche d'un roman jusqu'aux interactions post-lecture. Après consultation du synopsis, l'utilisateur lit les chapitres séquentiellement avec mise à jour automatique de sa progression. Les interactions (ajout à la bibliothèque avec activation des notifications, publication de critiques avec recalcul de moyenne) sont conditionnées à l'authentification, avec proposition d'inscription sinon.
+
+\subsubsection{Workflow Auteur (src/Activity/author\_workflow.wsd)}
+Ce diagramme détaillé couvre cinq partitions : gestion du roman (création avec métadonnées, sélection de genres/tags, initialisation en DRAFT), rédaction de chapitre (édition parallèle du titre, vérification du nombre de mots, prévisualisation), publication (vérification anti-spam, passage en ACTIVE pour le premier chapitre, notifications aux abonnés), suivi analytique (vues, notes, abonnés, reviews), et gestion du statut (transitions vers HIATUS ou COMPLETED).
+
+\textbf{Justification anti-spam :} la vérification anti-spam intervient avant publication pour bloquer le contenu problématique sans impacter les statistiques du roman ni spammer les abonnés.
+
+\subsubsection{Recherche et Découverte (src/Activity/search.wsd)}
+Workflow de recherche avec filtrage multi-critères (genre, tags, statut, note minimale) utilisant le moteur Elasticsearch, tri des résultats par pertinence ou popularité, et sauvegarde optionnelle des critères de recherche pour les utilisateurs authentifiés.
+
+\subsubsection{Soumission de Contenu (src/Activity/soumission.wsd)}
+Processus de validation de contenu avec vérification anti-spam, modération optionnelle (pour utilisateurs à faible réputation ou mots-clés sensibles détectés), et publication finale avec indexation dans le moteur de recherche.
+
+\subsection{Diagrammes de Séquence}
+
+\subsubsection{Publication de Chapitre (src/Sequence/chapter\_publish.wsd)}
+Séquence détaillée montrant l'interaction entre l'auteur, l'UI, l'objet Novel, la création dynamique d'un objet Chapter, la persistance en base, le recalcul de la note moyenne du roman, et la notification asynchrone des followers via le système de notifications qui interroge la base pour récupérer la liste des abonnés.
+
+\subsubsection{Soumission de Critique (src/Sequence/reviewing.wsd)}
+Workflow montrant qu'un auteur peut critiquer d'autres romans (héritage Reader $\leftarrow$ Author). La séquence crée un objet Review, le persiste, puis déclenche le recalcul de la moyenne du roman par agrégation (totalStars / reviewCount) avec mise à jour en base et affichage immédiat.
+
+\subsubsection{Authentification (src/Sequence/authentication.wsd)}
+Processus complet d'inscription (validation email, hachage bcrypt du mot de passe, envoi email de vérification) et de connexion (vérification credentials, création de session dans le cache Redis, génération de token JWT).
+
+\subsubsection{Gestion de Bibliothèque (src/Sequence/library.wsd)}
+Ajout d'un roman à la bibliothèque personnelle du lecteur avec création d'une entrée Library, initialisation de la progression de lecture, et activation optionnelle des notifications de mise à jour.
+
+\subsubsection{Abonnements (src/Sequence/subscription.wsd)}
+Création d'un objet Subscription liant un lecteur à un roman, configuration des préférences de notification, et enregistrement dans le système de notification pour les mises à jour futures.
+
+\subsubsection{Actions de Modération (src/Sequence/moderation.wsd)}
+Séquence montrant un modérateur supprimant une critique problématique, avec vérification des privilèges, suppression de la base, recalcul de la moyenne du roman, et notification de l'action au modérateur et à l'auteur de la critique.
+
+\subsubsection{Signalement de Contenu (src/Sequence/report\_content.wsd)}
+Processus de signalement par un utilisateur authentifié (création d'un objet Report avec motif), validation du signalement, notification des modérateurs via le système de notification, et affichage de confirmation à l'utilisateur.
+
+\section{Vérification de Conformité UML}
+
+\subsection{Couverture des diagrammes}
+
+Le projet fournit une modélisation complète selon la norme UML 2.5 :
+
+\textbf{Diagrammes structurels :}
+\begin{itemize}[noitemsep]
+    \item Diagramme de cas d'utilisation (définition des acteurs et fonctionnalités)
+    \item Diagramme de classes (modèle du domaine avec relations)
+    \item Diagramme d'objets (instances concrètes runtime)
+    \item Diagramme de packages (organisation logique en couches)
+    \item Diagramme de composants (architecture technique)
+    \item Diagramme de déploiement (infrastructure physique)
+\end{itemize}
+
+\textbf{Diagrammes comportementaux :}
+\begin{itemize}[noitemsep]
+    \item Diagramme d'états (cycle de vie Novel)
+    \item Diagrammes d'activité (workflows lecteur/auteur/recherche/soumission)
+    \item Diagrammes de séquence (7 scénarios détaillés couvrant les opérations critiques)
+\end{itemize}
+
+\subsection{Respect des principes UML}
+
+\textbf{Relations correctement utilisées :}
+\begin{itemize}[noitemsep]
+    \item Généralisation pour l'héritage d'acteurs et de classes
+    \item Composition (Novel-Chapter) pour dépendance de cycle de vie
+    \item Agrégation (Reader-Review, Novel-Review) pour dépendances faibles
+    \item Association simple pour relations navigables
+    \item Dépendance pour relations temporaires
+\end{itemize}
+
+\textbf{Stéréotypes standards :} \texttt{<<include>>}, \texttt{<<extend>>} pour les cas d'utilisation.
+
+\textbf{Multiplicités explicites :} toutes les associations spécifient les cardinalités (0..1, 1, 0..*, 1..*).
+
+\textbf{Visibilité cohérente :} attributs protégés (\#) pour les classes parentes, privés (-) pour les classes concrètes, publics (+) pour les méthodes.
+
+\subsection{Cohérence inter-diagrammes}
+
+Les entités du diagramme de classes sont instanciées dans le diagramme d'objets et utilisées dans tous les diagrammes dynamiques. Les cas d'utilisation se retrouvent dans les diagrammes d'activité et de séquence. L'architecture en packages du diagramme de packages se reflète dans les composants et le déploiement. Les états du diagramme d'états correspondent aux valeurs de l'énumération \texttt{NovelStatus} du diagramme de classes.
+
+\section{Conclusion}
+
+Cette modélisation UML fournit une spécification complète et rigoureuse d'une plateforme webnovel, couvrant les aspects statiques (structure du domaine, architecture logicielle, infrastructure) et dynamiques (workflows utilisateur, séquences d'interaction, transitions d'états).
+
+Les choix de conception majeurs (héritage Author $\leftarrow$ Reader, composition Novel-Chapter, état Shadowbanned intermédiaire, architecture en couches avec microservices, réplication master-slave, anti-spam en infrastructure) sont tous justifiés par des considérations de maintenabilité, performance, sécurité et expérience utilisateur.
+
+Le projet respecte strictement la norme UML 2.5 et fournit suffisamment de détails pour permettre une implémentation directe dans n'importe quel langage orienté objet. Les diagrammes sont versionnés en PlantUML pour faciliter la collaboration et l'évolution de la documentation.
+
+\end{document}
