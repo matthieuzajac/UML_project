@@ -1,5 +1,5 @@
 @startuml sequence diagram review submission
-header Diagramme de Séquence - Laisser une Critique
+header Diagramme de Séquence - Interactions avec les Reviews
 actor "Reader/Author" as R
 participant "UI : NovelPage" as UI
 participant "newReview : Review" as REV

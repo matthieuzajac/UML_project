@@ -1,5 +1,5 @@
 @startuml sequence diagram subscription
-header Diagramme de Séquence - Abonnement à un Roman
+header Diagramme de Séquence - Bibliothèque & Abonnements (Abonnement)
 actor "Reader/Author" as R
 participant "UI : NovelPage" as UI
 participant "sub : Subscription" as SUB

@@ -18,52 +18,49 @@ AU <|-- M
 
 rectangle "Webnovel System (Royal Road Clone)" as System {
     package "Guest Access" as GuestPkg {
-        ' === Use Cases Communs (Guest) ===
+        (Explore Catalog) as UC_Explore
         (Search Novel) as UC1
-        (Read Public Chapter) as UC2
         (Browse by Genre/Tag) as UC14
+        (Read Public Chapter) as UC2
         (Register Account) as UC15
     }
 
     package "Authenticated User" as AuthPkg {
-        ' === Use Cases Authenticated User ===
+        (Account & Security) as UC_Account
         (Login) as UC_Login
         (Logout) as UC_Logout
         (Manage Profile) as UC3
-        (Receive Notifications) as UC4
         (Reset Password) as UC16
+        (Receive Notifications) as UC4
         (Report Content) as UC13
     }
 
     package "Reader Features" as ReaderPkg {
-        ' === Use Cases Reader (hérite des use cases Auth User) ===
-        ' Un Reader peut faire tout ce qu'un Auth User fait
-        ' + fonctionnalités de lecture spécifiques
-        (Post Review/Rating) as UC5
+        (Library & Subscriptions) as UC_Library
         (Manage Library) as UC6
         (Subscribe to Novel) as UC7
-        (Mark Review as Helpful) as UC17
         (Track Reading Progress) as UC18
+        (Review Interactions) as UC_Reviews
+        (Post Review/Rating) as UC5
+        (Mark Review as Helpful) as UC17
     }
 
     package "Author Features" as AuthorPkg {
-        ' === Use Cases Author (hérite de Reader) ===
-        ' Un Author peut faire tout ce qu'un Reader fait
-        ' + fonctionnalités d'écriture spécifiques
+        (Manage Novel) as UC_ManageNovel
         (Create/Edit Novel) as UC8
+        (Add Tags/Genres) as UC20
+        (Manage Novel Status) as UC19
         (Publish Chapter) as UC9
         (View Analytics) as UC10
-        (Manage Novel Status) as UC19
-        (Add Tags/Genres) as UC20
     }
 
     package "Moderator Tools" as ModPkg {
-        ' === Use Cases Moderator (hérite de Auth User) ===
+        (Platform Moderation) as UC_Moderate
+        (Moderate Content) as UC22
         (Delete Review) as UC11
         (Ban User) as UC12
-        (Review Reports) as UC21
-        (Moderate Content) as UC22
         (Shadowban User) as UC23
+        (Review Reports) as UC21
     }
 
     GuestPkg -[hidden]-> AuthPkg
@@ -72,56 +69,51 @@ rectangle "Webnovel System (Royal Road Clone)" as System {
     AuthorPkg -[hidden]-> ModPkg
 
     ' Relations Inclusion/Extension
-    UC3 ..> UC_Login : <<include>>
-    UC5 ..> UC_Login : <<include>>
-    UC6 ..> UC_Login : <<include>>
-    UC7 ..> UC_Login : <<include>>
-    UC8 ..> UC_Login : <<include>>
-    UC9 ..> UC_Login : <<include>>
-    UC13 ..> UC_Login : <<include>>
-    UC17 ..> UC_Login : <<include>>
-    UC18 ..> UC_Login : <<include>>
+    UC_Explore ..> UC1 : <<include>>
+    UC_Explore ..> UC14 : <<include>>
+
+    UC_Account ..> UC_Login : <<include>>
+    UC_Account ..> UC_Logout : <<include>>
+    UC_Account ..> UC3 : <<include>>
+    UC_Account ..> UC16 : <<include>>
+
+    UC_Library ..> UC6 : <<include>>
+    UC_Library ..> UC7 : <<include>>
+    UC_Library ..> UC18 : <<include>>
+
+    UC_Reviews ..> UC5 : <<include>>
+    UC_Reviews ..> UC17 : <<include>>
+
+    UC_ManageNovel ..> UC8 : <<include>>
+    UC_ManageNovel ..> UC19 : <<include>>
+    UC_ManageNovel ..> UC20 : <<include>>
+
+    UC_Moderate ..> UC22 : <<include>>
+    UC_Moderate ..> UC11 : <<include>>
+    UC_Moderate ..> UC12 : <<include>>
+    UC_Moderate ..> UC23 : <<include>>
+    UC_Moderate ..> UC21 : <<include>>
 
     UC2 <.. UC13 : <<extend>>
     UC5 <.. UC13 : <<extend>>
-    UC1 <.. UC14 : <<extend>>
 }
 
 ' Liaisons Acteurs -> Cas d'utilisation
-' Guest
-G --> UC1
+G --> UC_Explore
 G --> UC2
-G --> UC14
 G --> UC15
 
-' Authenticated User
-AU --> UC_Login
-AU --> UC_Logout
-AU --> UC3
+AU --> UC_Account
 AU --> UC4
 AU --> UC13
-AU --> UC16
 
-' Reader (hérite de Auth User + ajouts)
-R --> UC5
-R --> UC6
-R --> UC7
-R --> UC17
-R --> UC18
+R --> UC_Library
+R --> UC_Reviews
 
-' Author (hérite de Reader + ajouts)
-' Note: comme Author hérite de Reader, il peut aussi faire UC5, UC6, UC7, etc.
-A --> UC8
+A --> UC_ManageNovel
 A --> UC9
 A --> UC10
-A --> UC19
-A --> UC20
 
-' Moderator (hérite de Auth User + ajouts)
-M --> UC11
-M --> UC12
-M --> UC21
-M --> UC22
-M --> UC23
+M --> UC_Moderate
 
 @enduml

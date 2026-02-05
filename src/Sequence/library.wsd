@@ -1,5 +1,5 @@
 @startuml adding novel to library
-header Diagramme de Séquence - Ajouter à la Bibliothèque
+header Diagramme de Séquence - Bibliothèque & Abonnements (Ajout)
 actor "Reader/Author" as R
 participant "UI : Interface" as UI
 participant "lib : Library" as L

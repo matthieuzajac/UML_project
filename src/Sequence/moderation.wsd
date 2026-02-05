@@ -1,5 +1,5 @@
 @startuml sequence diagram moderation
-header Diagramme de Séquence - Modération
+header Diagramme de Séquence - Modération de la Plateforme
 actor Moderator as M
 participant "UI : AdminPanel" as UI
 participant "novel : Novel" as N
