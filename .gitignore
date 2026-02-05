@@ -31,3 +31,16 @@ Thumbs.db
 
 # Log files
 *.log
+
+# LaTeX temporary files
+*.aux
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Allow the main LaTeX report
+!rapport_uml.tex
+# Allow generated PDF of the report
+!rapport_uml.pdf
