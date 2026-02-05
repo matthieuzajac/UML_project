@@ -4,6 +4,12 @@ skinparam conditionStyle diamond
 
 start
 
+note right
+  Un Author hérite de Reader :
+  il peut donc aussi lire, reviewer,
+  et gérer sa bibliothèque personnelle
+end note
+
 :Connexion en tant qu'Auteur;
 
 partition "Gestion du Roman" {

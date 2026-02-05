@@ -1,3 +1,7 @@
+' NOTE: Ce diagramme de composants est présent mais selon les directives UML,
+' ce type de diagramme est recommandé uniquement si une API ou un framework est utilisé.
+' Si aucune API n'est modélisée, ce diagramme pourrait ne pas être nécessaire.
+
 @startuml component diagram
 header Diagramme de Composants - Architecture Système
 

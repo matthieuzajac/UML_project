@@ -1,10 +1,16 @@
 @startuml adding novel to library
 header Diagramme de Séquence - Ajouter à la Bibliothèque
-actor Reader as R
+actor "Reader/Author" as R
 participant "UI : Interface" as UI
 participant "lib : Library" as L
 participant "novel : Novel" as N
 database "Database" as DB
+
+note right of R
+  Un Author est aussi un Reader,
+  donc peut gérer une bibliothèque
+  de lecture personnelle
+end note
 
 R -> UI : click "Add to Library"
 UI -> L : addNovel(novelId)

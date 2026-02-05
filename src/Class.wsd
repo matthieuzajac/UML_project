@@ -165,9 +165,10 @@ enum ReportStatus {
     DISMISSED
 }
 
-' Héritage
+' Héritage : Author hérite de Reader, qui hérite de Authenticated_user
+' Un Author est toujours un Reader, mais un Reader n'est pas toujours un Author
 Authenticated_user <|-- Reader
-Authenticated_user <|-- Author
+Reader <|-- Author
 Authenticated_user <|-- Moderator
 
 ' Composition (Le diamant noir : si le Novel est supprimé, les chapitres le sont aussi)
