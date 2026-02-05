@@ -2,66 +2,71 @@
 header Diagramme d'États - Classe Novel
 skinparam monochrome true
 skinparam shadowing false
+skinparam maxMessageSize 150
 
 [*] --> Draft : createNovel()
 
 state Draft {
-  Draft : description = "Invisible pour les lecteurs"
-  Draft : Le contenu peut être modifié librement
+  Draft : Invisible pour les lecteurs
+  Draft : Contenu modifiable librement
 }
 
 state Published {
   state Active {
-    Active : Le roman apparaît dans les recherches
-    Active : Les lecteurs reçoivent des notifications
+    Active : Roman visible dans les recherches
+    Active : Notifications aux lecteurs
   }
-  
+
   state Hiatus {
     Hiatus : "En pause"
-    Hiatus : Toujours visible mais marqué comme inactif
+    Hiatus : Visible mais inactif
   }
-  
+
   state Completed {
     Completed : "Terminé"
-    Completed : Statut final pour les archives
+    Completed : Statut final d'archive
   }
 }
 
 state Shadowbanned {
   Shadowbanned : Masqué des recherches publiques
-  Shadowbanned : Accessible uniquement par lien direct
-  Shadowbanned : En attente de révision modérateur
+  Shadowbanned : Accès par lien direct
+  Shadowbanned : En attente de modération
 }
 
 state Deleted {
   Deleted : Supprimé définitivement
-  Deleted : Données archivées ou purgées
+  Deleted : Données archivées/purgées
 }
 
+' Transitions internes
 Draft --> Draft : updateMetadata()
-Draft --> Active : publishFirstChapter()
-Active --> Active : publishChapter()
-Active --> Active : updateMetadata()
+Active --> Active : publishChapter()\nupdateMetadata()
 Hiatus --> Hiatus : updateMetadata()
 Completed --> Completed : updateMetadata()
 
-Active --> Hiatus : markAsHiatus() [si > 1 mois sans maj]
+' Transitions principales
+Draft --> Active : publishFirstChapter()
+Active --> Hiatus : markAsHiatus()\n[> 1 mois sans maj]
 Hiatus --> Active : resumePublication()
 Hiatus --> Completed : markAsCompleted()
 Active --> Completed : markAsCompleted()
 Completed --> Active : addSideStory()
 
-Active --> Shadowbanned : moderatorAction() [violation des règles]
-Hiatus --> Shadowbanned : moderatorAction() [violation des règles]
-Completed --> Shadowbanned : moderatorAction() [violation des règles]
-Shadowbanned --> Active : moderatorReview() [restaure actif]
-Shadowbanned --> Hiatus : moderatorReview() [restaure hiatus]
-Shadowbanned --> Completed : moderatorReview() [restaure terminé]
-Shadowbanned --> Deleted : moderatorAction() [violation grave]
+' Actions de modération (regroupées)
+Active --> Shadowbanned : moderatorAction()\n[violation]
+Hiatus --> Shadowbanned : moderatorAction()\n[violation]
+Completed --> Shadowbanned : moderatorAction()\n[violation]
 
+' Restauration par modération
+Shadowbanned -down-> Active : moderatorReview()\n[restaure]
+Shadowbanned -left-> Hiatus : moderatorReview()\n[restaure]
+Shadowbanned -up-> Completed : moderatorReview()\n[restaure]
+
+' Suppression
 Draft --> Deleted : deleteByAuthor()
-Published --> Deleted : deleteByAuthor()
-Published --> Deleted : deleteByModerator()
+Published --> Deleted : deleteByAuthor()\nor\nmoderator()
+Shadowbanned --> Deleted : moderatorAction()\n[violation grave]
 Deleted --> [*]
 
 @enduml
