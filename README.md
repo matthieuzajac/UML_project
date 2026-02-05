@@ -23,7 +23,7 @@ src/
 ├── Class.wsd             # Class diagram - Domain model and relationships
 ├── States.wsd            # State diagram - Novel lifecycle states
 ├── Component.wsd         # Component diagram - System architecture
-├── Deployment.wsd        # Deployment diagram - Infrastructure layout
+├── Deployment.wsd        # Deployment diagram - Component distribution
 ├── Package.wsd           # Package diagram - Logical organization
 ├── Object.wsd            # Object diagram - Runtime example
 ├── Timing.wsd            # Timing diagram - Real-time notification flow
@@ -82,20 +82,16 @@ src/
 - **Infrastructure Layer**: External services, cross-cutting concerns, databases
 
 #### Deployment Diagram (`Deployment.wsd`)
-**Purpose**: Illustrates the physical deployment architecture and infrastructure.
+**Purpose**: Illustrates the logical deployment architecture showing how system components are distributed across different nodes.
 
-**Infrastructure Components**:
-- **Client Devices**: Browsers, Mobile apps
-- **CDN**: Static assets, image cache
-- **Load Balancer**: Nginx for distribution
-- **Web Servers**: Frontend application cluster
-- **Application Servers**: API and WebSocket cluster
-- **Database Cluster**: Master-slave replication (PostgreSQL)
-- **Cache Layer**: Redis cluster
-- **Search Infrastructure**: Elasticsearch cluster
-- **Storage**: Object storage (S3/MinIO)
-- **Background Services**: Job queue (RabbitMQ), Workers
-- **External Services**: Email provider, Monitoring, Logging
+**Architecture Layers**:
+- **Client Layer**: Web browsers and mobile applications
+- **Web Server**: Frontend application serving user interfaces
+- **Application Server**: API Gateway, REST API, and WebSocket server
+- **Business Logic Server**: Core services (User, Content, Review, Notification, Moderation, Search)
+- **Data Storage**: Primary database, cache layer, and search index
+- **File Storage**: Object storage for images and avatars
+- **Background Workers**: Asynchronous processing for notifications, emails, and analytics
 
 #### Object Diagram (`Object.wsd`)
 **Purpose**: Shows a concrete runtime example with actual instance data.
