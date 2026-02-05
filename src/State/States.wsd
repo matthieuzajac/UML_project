@@ -1,72 +1,409 @@
-@startuml state diagram
-header Diagramme d'États - Classe Novel
-skinparam monochrome true
+@startuml State Transition Diagrams - Royal Road Clone
+title État des Transitions - Système Webnovel
+
+skinparam state {
+    BackgroundColor<<Draft>> LightBlue
+    BorderColor<<Draft>> Blue
+    BackgroundColor<<Active>> LightGreen
+    BorderColor<<Active>> Green
+    BackgroundColor<<Hiatus>> LightYellow
+    BorderColor<<Hiatus>> Orange
+    BackgroundColor<<Completed>> LightCyan
+    BorderColor<<Completed>> Teal
+    BackgroundColor<<Shadowbanned>> LightGray
+    BorderColor<<Shadowbanned>> Gray
+    BackgroundColor<<Deleted>> LightSalmon
+    BorderColor<<Deleted>> Red
+    BackgroundColor<<Pending>> Lavender
+    BorderColor<<Pending>> Purple
+    BackgroundColor<<Moderated>> MistyRose
+    BorderColor<<Moderated>> Crimson
+    BackgroundColor<<Resolved>> PaleGreen
+    BorderColor<<Resolved>> ForestGreen
+    BackgroundColor<<Dismissed>> Wheat
+    BorderColor<<Dismissed>> Sienna
+}
+
+skinparam stateMessageAlignment center
 skinparam shadowing false
-skinparam maxMessageSize 150
+skinparam maxMessageSize 180
 
-[*] --> Draft : createNovel()
+' ============================================
+' NOVEL LIFECYCLE
+' ============================================
+state "Novel Lifecycle" as novel_group <<Package>> {
 
-state Draft {
-  Draft : Invisible pour les lecteurs
-  Draft : Contenu modifiable librement
+    state Draft <<Draft>> {
+        description : Invisible aux lecteurs\nContenu modifiable\nAuteur seulement
+        entry : createNovel()\ninitializeMetadata()
+        do : saveDraftContent()
+        exit : validateContent()
+    }
+
+    state Active <<Active>> {
+        description : Visible dans les recherches\nNotifications aux abonnés\nStatistiques activées
+        entry : publishNovel()\nnotifySubscribers()
+        do : trackViews()\ncalculateRating()
+        exit : archiveStats()
+    }
+
+    state Hiatus <<Hiatus>> {
+        description : Visible mais inactif\nPas de notifications\nMise à jour bloquée
+        entry : pausePublication()\nnotifyReaders()
+        do : maintainVisibility()
+        exit : resumeOrComplete()
+    }
+
+    state Completed <<Completed>> {
+        description : Statut final\nArchive consultable\nPlus de mises à jour
+        entry : markAsCompleted()\nfinalNotification()
+        do : preserveContent()\nmaintainAvailability()
+    }
+
+    state Shadowbanned <<Shadowbanned>> {
+        description : Masqué des recherches\nAccès lien direct\nEn attente modération
+        entry : applyShadowban()\nhideFromSearch()
+        do : logViolation()
+        exit : restoreOrDelete()
+    }
+
+    state Deleted <<Deleted>> {
+        description : Supprimé définitivement\nDonnées purgées après 30j\nRécupération impossible
+        entry : softDelete()\nschedulePurge()
+        do : archiveBackup()
+        exit : permanentPurge()
+    }
+
+    ' Self-transitions
+    Draft -> Draft : updateMetadata()\neditContent()\naddTags()
+    Active -> Active : publishChapter()\nupdateMetadata()\nrespondToReviews()
+    Hiatus -> Hiatus : updateMetadata()\nrespondToReviews()
+    Completed -> Completed : updateMetadata()\nrespondToReviews()\naddSideStory()
+
+    ' Main transitions
+    [*] --> Draft : createNovel()\nAuthor initiates
+    Draft --> Active : publishFirstChapter()\nValidated by system
+    Active --> Hiatus : markAsHiatus()\nOr 30+ days inactive
+    Hiatus --> Active : resumePublication()\nAuthor decision
+    Hiatus --> Completed : markAsCompleted()\nAuthor decision
+    Active --> Completed : markAsCompleted()\nFinal chapter
+    Completed --> Active : addSideStory()\nNew content
+
+    ' Moderator actions
+    Active --> Shadowbanned : shadowBan()\nContent violation\nReport confirmed
+    Hiatus --> Shadowbanned : shadowBan()\nContent violation\nReport confirmed
+    Completed --> Shadowbanned : shadowBan()\nContent violation\nReport confirmed
+
+    ' Moderator restoration
+    Shadowbanned --> Active : restoreContent()\nModerator approves\nViolation resolved
+    Shadowbanned --> Hiatus : restoreContent()\nWith Hiatus status\nViolation resolved
+    Shadowbanned --> Completed : restoreContent()\nWith Completed status\nViolation resolved
+
+    ' Deletion paths
+    Draft --> Deleted : deleteNovel()\nAuthor request\nNo chapters published
+    Active --> Deleted : deleteNovel()\nAuthor or Moderator\nGrace period 7 days
+    Hiatus --> Deleted : deleteNovel()\nAuthor or Moderator\nGrace period 7 days
+    Completed --> Deleted : deleteNovel()\nAuthor or Moderator\nGrace period 30 days
+    Shadowbanned --> Deleted : permanentDelete()\nSevere violation\nModerator decision
+    Deleted --> [*] : purgeComplete()\nAfter retention period
 }
 
-state Published {
-  state Active {
-    Active : Roman visible dans les recherches
-    Active : Notifications aux lecteurs
-  }
+' ============================================
+' CHAPTER LIFECYCLE
+' ============================================
+state "Chapter Lifecycle" as chapter_group <<Package>> {
 
-  state Hiatus {
-    Hiatus : "En pause"
-    Hiatus : Visible mais inactif
-  }
+    state ChapterDraft <<Draft>> {
+        description : Brouillon non visible\nAuteur seulement\nÉdition libre
+        entry : createChapter()\ninitializeContent()
+        do : autoSave()\ncheckWordCount()
+        exit : validateForPublish()
+    }
 
-  state Completed {
-    Completed : "Terminé"
-    Completed : Statut final d'archive
-  }
+    state ChapterPending <<Pending>> {
+        description : En attente validation\nAnti-spam check\nModération optionnelle
+        entry : submitForPublish()\nrunAntiSpam()
+        do : queueForReview()
+        exit : approveOrReject()
+    }
+
+    state Published <<Active>> {
+        description : Visible aux lecteurs\nVues comptabilisées\nReviews autorisées
+        entry : publishChapter()\nnotifySubscribers()
+        do : incrementViews()\nlogAccess()
+        exit : unpublishOrArchive()
+    }
+
+    state ChapterArchived <<Completed>> {
+        description : Historique préservé\nPlus de modifications\nLecture seule
+        entry : archiveChapter()\nbackupContent()
+        do : maintainAccess()
+        exit : [no exit]
+    }
+
+    state ChapterDeleted <<Deleted>> {
+        description : Supprimé définitivement\nRécupération impossible\nDonnées purgées
+        entry : deleteChapter()\nremoveContent()
+        do : cleanupDatabase()
+        exit : [no exit]
+    }
+
+    ' Transitions
+    [*] --> ChapterDraft : createChapter()\nAuthor action
+    ChapterDraft -> ChapterDraft : editContent()\nupdateTitle()\nautoSave()
+    ChapterDraft --> ChapterPending : submitForPublish()\nAuthor action
+    ChapterPending --> Published : approvePublish()\nAnti-spam passed
+    ChapterPending --> ChapterDraft : rejectPublish()\nSpam detected\nor validation failed
+    Published --> Published : updateContent()\nMinor corrections\nVersion tracked
+    Published --> ChapterArchived : archiveChapter()\nNovel completed
+    Published --> ChapterDeleted : deleteChapter()\nAuthor or Moderator
+    ChapterDraft --> ChapterDeleted : deleteDraft()\nAuthor action
+    ChapterArchived --> [*] : [terminal state]
+    ChapterDeleted --> [*] : [terminal state]
 }
 
-state Shadowbanned {
-  Shadowbanned : Masqué des recherches publiques
-  Shadowbanned : Accès par lien direct
-  Shadowbanned : En attente de modération
+' ============================================
+' REVIEW LIFECYCLE
+' ============================================
+state "Review Lifecycle" as review_group <<Package>> {
+
+    state ReviewDraft <<Draft>> {
+        description : En rédaction\nNon soumise\nAuteur seulement
+        entry : startWriting()
+        do : autoSaveDraft()
+        exit : submitOrCancel()
+    }
+
+    state ReviewPending <<Pending>> {
+        description : Soumise pour publication\nValidation en cours\nAnti-spam check
+        entry : submitReview()\nvalidateContent()
+        do : checkGuidelines()\nfilterSpam()
+        exit : publishOrReject()
+    }
+
+    state ReviewPublished <<Active>> {
+        description : Visible publiquement\nNotations comptabilisées\nPeut être marquée utile
+        entry : publishReview()\nupdateNovelRating()
+        do : trackHelpfulVotes()\nlogInteractions()
+        exit : editOrHide()
+    }
+
+    state ReviewHidden <<Moderated>> {
+        description : Masquée par modération\nVisible à l'auteur\nPeut être restaurée
+        entry : hideReview()\nModerator action
+        do : logReason()\nnotifyAuthor()
+        exit : restoreOrDelete()
+    }
+
+    state ReviewDeleted <<Deleted>> {
+        description : Supprimée définitivement\nDonnées purgées\nNon récupérable
+        entry : deleteReview()\nAuthor or Moderator
+        do : cleanupDatabase()
+        exit : [no exit]
+    }
+
+    ' Transitions
+    [*] --> ReviewDraft : startWriting()\nReader action
+    ReviewDraft --> ReviewDraft : editDraft()\nupdateRating()\nsaveProgress()
+    ReviewDraft --> ReviewPending : submitReview()\nReader action
+    ReviewDraft --> ReviewDeleted : cancelDraft()\nUser action
+    ReviewPending --> ReviewPublished : approve()\nValidation passed
+    ReviewPending --> ReviewDraft : reject()\nGuidelines violation
+    ReviewPublished --> ReviewDraft : edit()\nAuthor edits\nRequires re-validation
+    ReviewPublished --> ReviewHidden : hide()\nModerator action\nor report confirmed
+    ReviewHidden --> ReviewPublished : restore()\nModerator approves
+    ReviewHidden --> ReviewDeleted : delete()\nSevere violation\nor author request
+    ReviewPublished --> ReviewDeleted : delete()\nAuthor request\nor severe violation
+    ReviewDeleted --> [*] : [terminal state]
 }
 
-state Deleted {
-  Deleted : Supprimé définitivement
-  Deleted : Données archivées/purgées
+' ============================================
+' REPORT LIFECYCLE
+' ============================================
+state "Report Lifecycle" as report_group <<Package>> {
+
+    state ReportCreated <<Pending>> {
+        description : Signalement soumis\nDans la file d'attente\nPas encore traité
+        entry : createReport()\nlogIncident()
+        do : assignPriority()\nqueueForReview()
+        exit : startProcessing()
+    }
+
+    state ReportUnderReview <<Pending>> {
+        description : En cours d'examen\nModérateur assigné\nInvestigation active
+        entry : assignModerator()\nnotifyReporter()
+        do : investigate()\ngatherEvidence()
+        exit : completeReview()
+    }
+
+    state ReportResolved <<Resolved>> {
+        description : Résolu positivement\nAction prise\nStatut final
+        entry : resolveReport()\ntakeAction()\nnotifyParties()
+        do : logOutcome()\nupdateMetrics()
+        exit : [no exit]
+    }
+
+    state ReportDismissed <<Dismissed>> {
+        description : Rejeté sans action\nInfondé\nStatut final
+        entry : dismissReport()\nlogReason()\nnotifyReporter()
+        do : archiveRecord()\nupdateMetrics()
+        exit : [no exit]
+    }
+
+    ' Transitions
+    [*] --> ReportCreated : submitReport()\nUser action
+    ReportCreated --> ReportUnderReview : assignToModerator()\nAuto or manual
+    ReportUnderReview --> ReportResolved : confirmViolation()\nModerator decision
+    ReportUnderReview --> ReportDismissed : noViolation()\nModerator decision
+    ReportUnderReview --> ReportCreated : reassign()\nNew moderator
+    ReportResolved --> [*] : [terminal state]
+    ReportDismissed --> [*] : [terminal state]
 }
 
-' Transitions internes
-Draft --> Draft : updateMetadata()
-Active --> Active : publishChapter()\nupdateMetadata()
-Hiatus --> Hiatus : updateMetadata()
-Completed --> Completed : updateMetadata()
+' ============================================
+' SUBSCRIPTION LIFECYCLE
+' ============================================
+state "Subscription Lifecycle" as sub_group <<Package>> {
 
-' Transitions principales
-Draft --> Active : publishFirstChapter()
-Active --> Hiatus : markAsHiatus()\n[> 1 mois sans maj]
-Hiatus --> Active : resumePublication()
-Hiatus --> Completed : markAsCompleted()
-Active --> Completed : markAsCompleted()
-Completed --> Active : addSideStory()
+    state Subscribed <<Active>> {
+        description : Actif\nNotifications activées\nStatistiques suivies
+        entry : subscribe()\naddToList()
+        do : monitorUpdates()\ncountEngagement()
+        exit : pauseOrCancel()
+    }
 
-' Actions de modération (regroupées)
-Active --> Shadowbanned : moderatorAction()\n[violation]
-Hiatus --> Shadowbanned : moderatorAction()\n[violation]
-Completed --> Shadowbanned : moderatorAction()\n[violation]
+    state SubscriptionPaused <<Hiatus>> {
+        description : Notifications désactivées\nAbonnement maintenu\nPeut être réactivé
+        entry : pauseSubscription()\nmuteNotifications()
+        do : keepInLibrary()
+        exit : resumeOrCancel()
+    }
 
-' Restauration par modération
-Shadowbanned -down-> Active : moderatorReview()\n[restaure]
-Shadowbanned -left-> Hiatus : moderatorReview()\n[restaure]
-Shadowbanned -up-> Completed : moderatorReview()\n[restaure]
+    state Unsubscribed <<Deleted>> {
+        description : Annulé\nDonnées de suivi conservées\nPeut se réabonner
+        entry : unsubscribe()\nremoveFromActive()
+        do : archiveHistory()
+        exit : [no exit]
+    }
 
-' Suppression
-Draft --> Deleted : deleteByAuthor()
-Published --> Deleted : deleteByAuthor()\nor\nmoderator()
-Shadowbanned --> Deleted : moderatorAction()\n[violation grave]
-Deleted --> [*]
+    ' Transitions
+    [*] --> Subscribed : subscribe()\nReader action
+    Subscribed --> Subscribed : receiveNotification()\nUpdate detected
+    Subscribed --> SubscriptionPaused : pauseNotifications()\nUser preference
+    Subscribed --> Unsubscribed : unsubscribe()\nUser action
+    SubscriptionPaused --> Subscribed : resumeNotifications()\nUser action
+    SubscriptionPaused --> Unsubscribed : unsubscribe()\nUser action
+    Unsubscribed --> Subscribed : resubscribe()\nUser action
+    Unsubscribed --> [*] : [terminal state]
+}
+
+' ============================================
+' LIBRARY ENTRY LIFECYCLE
+' ============================================
+state "Library Entry Lifecycle" as lib_group <<Package>> {
+
+    state PlanToRead <<Draft>> {
+        description : Dans la liste\nPas commencé\nOrdre personnalisé
+        entry : addToLibrary()\nsetPriority()
+        do : trackInterest()
+        exit : startReading()
+    }
+
+    state Reading <<Active>> {
+        description : En cours de lecture\nProgression suivie\nStatistiques actives
+        entry : startReading()\nbeginTracking()
+        do : updateProgress()\nlogActivity()
+        exit : completeOrHold()
+    }
+
+    state OnHold <<Hiatus>> {
+        description : En pause\nProgression sauvegardée\nNotifications actives
+        entry : pauseReading()\nsaveProgress()
+        do : waitForUpdate()
+        exit : resumeOrComplete()
+    }
+
+    state Completed <<Completed>> {
+        description : Terminé\nProgression complète\nHistorique préservé
+        entry : markAsCompleted()\nfinalizeProgress()
+        do : preserveStats()\nrecommendSimilar()
+        exit : [no exit]
+    }
+
+    state Dropped <<Deleted>> {
+        description : Abandonné\nProgression conservée\nPeut reprendre
+        entry : dropNovel()\nmarkAsDropped()
+        do : archiveStats()
+        exit : [no exit]
+    }
+
+    state Removed <<Deleted>> {
+        description : Retiré de la bibliothèque\nPlus de suivi\nDonnées archivées
+        entry : removeFromLibrary()\ncleanupUI()
+        do : preserveHistory()
+        exit : [no exit]
+    }
+
+    ' Transitions
+    [*] --> PlanToRead : addToLibrary()\nReader action
+    PlanToRead --> Reading : startReading()\nBegin chapter 1
+    PlanToRead --> Removed : remove()\nUser action
+    Reading --> Reading : continueReading()\nNext chapter\nUpdate progress
+    Reading --> OnHold : pauseReading()\nUser action
+    Reading --> Completed : markCompleted()\nLast chapter read
+    Reading --> Dropped : dropNovel()\nUser action
+    OnHold --> Reading : resumeReading()\nUser action\nor new chapter
+    OnHold --> Completed : markCompleted()\nCatch up finished
+    OnHold --> Dropped : dropNovel()\nUser action
+    Completed --> Reading : reread()\nStart from beginning\nor continue
+    Completed --> Removed : remove()\nUser action
+    Dropped --> Reading : resume()\nContinue from last\nposition
+    Dropped --> Removed : remove()\nUser action
+    Removed --> [*] : [terminal state]
+}
+
+' Visual grouping notes
+note right of novel_group
+  **ROMAN - Cycle de Vie Principal**
+  
+  États principaux du roman avec
+  transitions et actions détaillées.
+  Géré par l'auteur et les modérateurs.
+end note
+
+note right of chapter_group
+  **CHAPITRE - Cycle de Publication**
+  
+  Du brouillon à la publication avec
+  validation anti-spam et modération.
+end note
+
+note right of review_group
+  **REVIEW - Cycle de Modération**
+  
+  Processus de validation des critiques
+  avec gestion des signalements.
+end note
+
+note right of report_group
+  **SIGNALLEMENT - Flux de Traitement**
+  
+  Gestion des rapports de contenu
+  par l'équipe de modération.
+end note
+
+note right of sub_group
+  **ABONNEMENT - Gestion des Notifications**
+  
+  Contrôle des préférences de
+  notification des lecteurs.
+end note
+
+note right of lib_group
+  **BIBLIOTHÈQUE - Suivi de Lecture**
+  
+  États de progression de lecture
+  personnalisable par l'utilisateur.
+end note
 
 @enduml

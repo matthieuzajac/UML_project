@@ -169,11 +169,16 @@ find src -name "*.wsd" -exec plantuml -tpdf -o ../../exports/pdf {} \;
 2. **src/Activity/author_workflow.wsd** - Author journey
 3. **src/Sequence/authentication.wsd** - Login/register
 
+### Want to Understand State Changes?
+1. **src/State/States.wsd** - All entity lifecycles (Novel, Chapter, Review, Report, Subscription, Library)
+2. **src/State/README.md** - Detailed documentation of state transitions
+
 ### Want to Implement a Feature?
 1. Find the use case in **src/Use_case.wsd**
 2. Check the corresponding sequence diagram in **src/Sequence/**
 3. Check the activity workflow in **src/Activity/**
-4. Reference entities in **src/Class.wsd**
+4. Check state transitions in **src/State/States.wsd**
+5. Reference entities in **src/Class.wsd**
 
 ---
 

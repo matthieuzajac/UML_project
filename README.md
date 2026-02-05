@@ -21,7 +21,6 @@ This is a **documentation-only** repository containing PlantUML diagrams that mo
 src/
 ├── Use_case.wsd          # Use case diagram - System capabilities and actors
 ├── Class.wsd             # Class diagram - Domain model and relationships
-├── States.wsd            # State diagram - Novel lifecycle states
 ├── Component.wsd         # Component diagram - System architecture
 ├── Deployment.wsd        # Deployment diagram - Component distribution
 ├── Package.wsd           # Package diagram - Logical organization
@@ -32,14 +31,17 @@ src/
 │   ├── soumission.wsd    # Content submission workflow
 │   ├── search.wsd        # Search and discovery workflow
 │   └── author_workflow.wsd # Author complete workflow
-└── Sequence/
-    ├── authentication.wsd    # Login and registration flow
-    ├── chapter_publish.wsd   # Chapter publication flow
-    ├── library.wsd           # Add to library flow
-    ├── moderation.wsd        # Content moderation flow
-    ├── reviewing.wsd         # Review submission flow
-    ├── subscription.wsd      # Subscribe/unsubscribe flow
-    └── report_content.wsd    # Content reporting flow
+├── Sequence/
+│   ├── authentication.wsd    # Login and registration flow
+│   ├── chapter_publish.wsd   # Chapter publication flow
+│   ├── library.wsd           # Add to library flow
+│   ├── moderation.wsd        # Content moderation flow
+│   ├── reviewing.wsd         # Review submission flow
+│   ├── subscription.wsd      # Subscribe/unsubscribe flow
+│   └── report_content.wsd    # Content reporting flow
+└── State/
+    ├── States.wsd            # State diagrams - All entity lifecycles
+    └── README.md             # State diagram documentation
 ```
 
 ## Diagram Descriptions
@@ -110,18 +112,26 @@ src/
 - **Author**: Create/edit novels, Publish chapters, View analytics, Manage novel status, Add tags/genres
 - **Moderator**: Delete reviews, Ban/shadowban users, Review reports, Moderate content
 
-#### State Diagram (`States.wsd`)
-**Purpose**: Models the lifecycle of a Novel entity through different states.
+#### State Diagrams (`State/States.wsd`)
+**Purpose**: Comprehensive state transition diagrams for all major entities in the system.
 
-**States**:
-- **Draft**: Initial state, invisible to readers
-- **Active**: Published and visible in searches
-- **Hiatus**: Paused but still visible
-- **Completed**: Finished novel
-- **Shadowbanned**: Hidden from public searches (moderation)
-- **Deleted**: Final state, permanently removed
+**State Machines Included**:
+1. **Novel Lifecycle** (6 states): Draft, Active, Hiatus, Completed, Shadowbanned, Deleted
+2. **Chapter Lifecycle** (5 states): Draft, Pending, Published, Archived, Deleted
+3. **Review Lifecycle** (5 states): Draft, Pending, Published, Hidden, Deleted
+4. **Report Lifecycle** (4 states): Created, Under Review, Resolved, Dismissed
+5. **Subscription Lifecycle** (3 states): Subscribed, Paused, Unsubscribed
+6. **Library Entry Lifecycle** (6 states): PlanToRead, Reading, OnHold, Completed, Dropped, Removed
 
-**Transitions**: Publishing, status updates, moderation actions, deletion
+**Features**:
+- Color-coded states by type (Draft/Active/Hiatus/Completed/Moderated/Deleted)
+- Entry/do/exit actions for each state
+- Self-transitions for in-state operations
+- Detailed transition conditions and triggering events
+- Grace periods for deletions
+- Complete moderation workflows
+
+**Documentation**: See `State/README.md` for detailed explanations
 
 #### Timing Diagram (`Timing.wsd`)
 **Purpose**: Shows real-time behavior during chapter publication and notification delivery.

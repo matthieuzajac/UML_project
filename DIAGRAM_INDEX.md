@@ -84,12 +84,27 @@ Quick reference guide to all diagrams in this repository.
 ---
 
 ### 7. State Diagram
-**File**: `src/States.wsd`  
-**Purpose**: Novel entity lifecycle and state transitions  
-**States**: Draft → Active → Hiatus → Completed, with Shadowbanned and Deleted states  
-**Transitions**: Publication, status updates, moderation actions
+**File**: `src/State/States.wsd`  
+**Purpose**: Comprehensive state transitions for all major entities  
+**State Machines Included**:
+- **Novel Lifecycle** (6 states): Draft, Active, Hiatus, Completed, Shadowbanned, Deleted
+- **Chapter Lifecycle** (5 states): Draft, Pending, Published, Archived, Deleted
+- **Review Lifecycle** (5 states): Draft, Pending, Published, Hidden, Deleted
+- **Report Lifecycle** (4 states): Created, Under Review, Resolved, Dismissed
+- **Subscription Lifecycle** (3 states): Subscribed, Paused, Unsubscribed
+- **Library Entry Lifecycle** (6 states): PlanToRead, Reading, OnHold, Completed, Dropped, Removed
 
-**View this to understand**: How a novel's status changes over time
+**Features**:
+- Color-coded states by type (Draft/Active/Hiatus/Completed/Moderated/Deleted)
+- Entry/do/exit actions for each state
+- Self-transitions for in-state operations
+- Detailed transition conditions and triggering events
+- Grace periods for deletions
+- Complete moderation workflows
+
+**View this to understand**: How all major entities change state throughout their lifecycle
+
+**Documentation**: `src/State/README.md`
 
 ---
 
@@ -241,7 +256,8 @@ Quick reference guide to all diagrams in this repository.
 | Moderation | - | Sequence/moderation.wsd, Sequence/report_content.wsd |
 
 ### I want to understand state changes
-→ **Novel states**: States.wsd  
+→ **All entity states**: State/States.wsd (6 state machines)
+→ **Documentation**: State/README.md
 → **Real-time behavior**: Timing.wsd
 
 ---
